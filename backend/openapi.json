@@ -10,6 +10,27 @@
     }
   ],
   "paths": {
+    "/health/health": {
+      "get": {
+        "operationId": "health_check",
+        "tags": [
+          "system"
+        ],
+        "description": "/ Health Check 엔드포인트\n/ \n/ Docker의 healthcheck에서 사용됩니다.\n/ 서버가 정상적으로 실행 중인지 확인하는 간단한 엔드포인트입니다.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/url-reputations/": {
       "get": {
         "operationId": "get_url_reputation",
@@ -153,6 +174,9 @@
     }
   },
   "tags": [
+    {
+      "name": "system"
+    },
     {
       "name": "url-reputations"
     }
