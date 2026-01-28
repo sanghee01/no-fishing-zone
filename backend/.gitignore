@@ -1,7 +1,11 @@
+# Rust 빌드 산출물
 /target
+Cargo.lock
 
+# Rust 로컬 설정
+.cargo/
 
-.DS_Store
-._.DS_Store
-**/.DS_Store
-**/._.DS_Store
+# 데이터베이스 (로컬 개발용)
+*.db
+*.sqlite
+*.sqlite3

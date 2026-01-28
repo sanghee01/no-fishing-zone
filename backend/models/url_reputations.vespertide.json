@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dev-five-git/vespertide/refs/heads/main/schemas/model.schema.json",
+  "name": "url_reputations",
+  "columns": [
+    {
+      "name": "url",
+      "type": "text",
+      "nullable": false,
+      "primary_key": true
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "name": "score",
+      "type": "integer",
+      "nullable": false,
+      "index": true
+    },
+    {
+      "name": "is_black",
+      "type": "boolean",
+      "nullable": false,
+      "default": "false"
+    }
+  ]
+}

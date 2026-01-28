@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dev-five-git/vespertide/refs/heads/main/schemas/migration.schema.json",
+  "actions": [
+    {
+      "columns": [
+        {
+          "name": "url",
+          "nullable": false,
+          "primary_key": true,
+          "type": "text"
+        },
+        {
+          "name": "description",
+          "nullable": true,
+          "type": "text"
+        },
+        {
+          "index": true,
+          "name": "score",
+          "nullable": false,
+          "type": "integer"
+        },
+        {
+          "default": "false",
+          "name": "is_black",
+          "nullable": false,
+          "type": "boolean"
+        }
+      ],
+      "constraints": [],
+      "table": "url_reputations",
+      "type": "create_table"
+    }
+  ],
+  "comment": "create url_reputations table",
+  "created_at": "2026-01-27T16:36:38Z",
+  "version": 1
+}
