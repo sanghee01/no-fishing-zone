@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Aegis Link API - Todo & User Management",
+    "title": "Aegis Link API - URL Reputation Management",
     "version": "1.0.0"
   },
   "servers": [
@@ -9,6 +9,152 @@
       "url": "http://localhost:3000"
     }
   ],
-  "paths": {},
-  "components": {}
+  "paths": {
+    "/url-reputations/": {
+      "get": {
+        "operationId": "get_url_reputation",
+        "tags": [
+          "url-reputations"
+        ],
+        "description": "/ URL 평판 정보 조회\n/ \n/ 사용자가 URL 클릭 시 해당 URL의 안전성을 확인하기 위해 사용합니다.\n/ DB에 해당 URL이 없으면 404를 반환합니다.",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlReputationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_url_reputation",
+        "tags": [
+          "url-reputations"
+        ],
+        "description": "/ URL 평판 정보 등록/업데이트\n/ \n/ AI Agent가 수집한 URL 정보를 DB에 저장합니다.\n/ 이미 존재하는 URL이면 업데이트하고, 없으면 새로 생성합니다.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUrlReputation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlReputationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateUrlReputation": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_black": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "score",
+          "is_black"
+        ]
+      },
+      "GetUrlQuery": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "UrlReputationResponse": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_black": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "score",
+          "is_black"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "url-reputations"
+    }
+  ]
 }

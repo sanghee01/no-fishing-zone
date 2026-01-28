@@ -2,6 +2,7 @@ use sea_orm::Database;
 use vespera::vespera;
 
 mod routes;
+mod models;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -13,13 +14,14 @@ async fn main() -> anyhow::Result<()> {
 
     println!("✅ Database migrations applied successfully!");
 
-    // 3. Vespera 앱 설정
+    // 3. Vespera 앱 설정 (DB를 State로 공유)
     let app = vespera!(
         openapi = "openapi.json",
-        title = "Aegis Link API - Todo & User Management",
+        title = "Aegis Link API - URL Reputation Management",
         version = "1.0.0",
         docs_url = "/docs"
-    );
+    )
+    .with_state(db.clone());
 
     // 4. 서버 시작
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
