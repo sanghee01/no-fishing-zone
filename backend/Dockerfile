@@ -37,8 +37,10 @@ RUN apt-get update && \
     apt-get install -y ca-certificates libssl3 wget && \
     rm -rf /var/lib/apt/lists/*
 
-# 빌드 스테이지에서 컴파일된 실행 파일만 복사
+# 빌드 스테이지에서 컴파일된 실행 파일 및 설정 파일 복사
 COPY --from=builder /app/target/release/aegis-link /usr/local/bin/aegis-link
+COPY --from=builder /app/openapi.json /usr/local/bin/openapi.json
+WORKDIR /usr/local/bin
 
 # 8000번 포트 노출 (기존 docker-compose 설정과 맞춤)
 EXPOSE 8000
