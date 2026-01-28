@@ -2,7 +2,7 @@
 # 1단계: 빌드 스테이지
 # ============================================
 # Rust 컴파일러가 포함된 공식 이미지 사용
-FROM rust:1.75 AS builder
+FROM rustlang/rust:nightly AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -21,7 +21,6 @@ RUN mkdir src && \
 COPY . .
 
 # Release 모드로 빌드
-# --release: 최적화된 바이너리 생성 (느리지만 성능 좋음)
 RUN cargo build --release
 
 # ============================================
