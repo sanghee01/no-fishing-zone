@@ -2,26 +2,8 @@
 /target
 Cargo.lock
 
-# 환경 변수 (민감 정보)
-.env
-.env.local
-.env.*.local
-
-# IDE 설정
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# macOS
-.DS_Store
-._.DS_Store
-**/.DS_Store
-**/._.DS_Store
-
-# 로그 파일
-*.log
+# Rust 로컬 설정
+.cargo/
 
 # 데이터베이스 (로컬 개발용)
 *.db
