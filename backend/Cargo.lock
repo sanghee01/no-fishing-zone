@@ -409,9 +409,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.54"
+version = "4.5.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6e6ff9dcd79cff5cd969a17a545d79e84ab086e444102a591e288a8aa3ce394"
+checksum = "3e34525d5bbbd55da2bb745d34b36121baac88d07619a9a09cfcf4a6c0832785"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -419,9 +419,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.54"
+version = "4.5.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa42cf4d2b7a41bc8f663a7cab4031ebafa1bf3875705bfaf8466dc60ab52c00"
+checksum = "59a20016a20a3da95bef50ec7238dbd09baeef4311dcdd38ec15aba69812fb61"
 dependencies = [
  "anstream",
  "anstyle",
@@ -431,9 +431,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.5.49"
+version = "4.5.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a0b5487afeab2deb2ff4e03a807ad1a03ac532ff5a2cee5d86884440c7f7671"
+checksum = "a92793da1a46a5f2a02a6f4c46c6496b28c43638adea8306fcb0caa1634f24e5"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -2998,9 +2998,9 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vespera"
-version = "0.1.24"
+version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d98c8f768a255f6b5b4da26ddfa9c2c7df4cfccb768ce194400ae52dbc34f57"
+checksum = "5596154595f63a8811a336aac5f25fd464960cae5179be508b0108578f06a7c6"
 dependencies = [
  "axum",
  "axum-extra",
@@ -3013,9 +3013,9 @@ dependencies = [
 
 [[package]]
 name = "vespera_core"
-version = "0.1.24"
+version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79ad69cf3f8d3ae6b66276c8dd3bcbb6a88a881e66190dcadcd825be170e9435"
+checksum = "55d95cdddeaa5903ec10a77aedae9f4f05a60e1352ffad1ce065a0f856dc7516"
 dependencies = [
  "serde",
  "serde_json",
@@ -3023,9 +3023,9 @@ dependencies = [
 
 [[package]]
 name = "vespera_macro"
-version = "0.1.24"
+version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd1a1c4d926a509eac4dd4d3d62ce1bcb05ab6b0317beb8756b5fe687d5cc9da"
+checksum = "8ee53365cc9a9907fce21799eceb59eeeb380bfe0f5b8be8699de8bf442f60ba"
 dependencies = [
  "anyhow",
  "proc-macro2",
@@ -3038,9 +3038,9 @@ dependencies = [
 
 [[package]]
 name = "vespertide"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07cc472c0328f4fca10745ab2043bb93f46d0df59959e324ba54f1592870ec1d"
+checksum = "c738ace78d1e979631b2b16437bdec0bbdf4f7617a37c17b177b84deebe5ec43"
 dependencies = [
  "vespertide-core",
  "vespertide-macro",
@@ -3048,9 +3048,9 @@ dependencies = [
 
 [[package]]
 name = "vespertide-config"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "590ca77592747fa25c41728d3c5dc005b36c04dc7ebccb1cc8424437330ad0e5"
+checksum = "9749e3ed7ad1cd767bbebd565912ebce5ffc7dc3f9a15cb626556b231bddbdc8"
 dependencies = [
  "clap",
  "schemars",
@@ -3059,9 +3059,9 @@ dependencies = [
 
 [[package]]
 name = "vespertide-core"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6418251956e884e1d9cadbfaf050f4c48e9f7164412df7d633e679050848111"
+checksum = "02a88cece6a9b8871b1fc66bda30c3e1a4720fb954324b22b757932ef35ce0d1"
 dependencies = [
  "schemars",
  "serde",
@@ -3071,9 +3071,9 @@ dependencies = [
 
 [[package]]
 name = "vespertide-loader"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c3d8893bdb3fd101a40ed9ef122a6698e4286038da3d4accb1934a00d5bac97"
+checksum = "7e5ee4e26010815c3066e40963c0bb40cdb5c57bf8ecbef0d25c5586e26d849f"
 dependencies = [
  "anyhow",
  "serde_json",
@@ -3085,9 +3085,9 @@ dependencies = [
 
 [[package]]
 name = "vespertide-macro"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "131be2002d867282702dfd893b4842bf97faa9a6d349850fd55deb61a74ba2fd"
+checksum = "5ab52f3321d9418f357139e1f517c0aca157785ce5077e6fa39e9fc26fee9f18"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3102,15 +3102,15 @@ dependencies = [
 
 [[package]]
 name = "vespertide-naming"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d5d1d92d3a1e439864be80d8948d74c80b34944bfd2051d31c1a9f27665824c"
+checksum = "775287646e75de6a94ba29962c97aa9139aa0ea1886486dafbe39467ede7b89e"
 
 [[package]]
 name = "vespertide-planner"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58f145a25dbea95e5ca1e00472e1f122c8a803603f3908f8f72e0660e15a3692"
+checksum = "a003a7eaffb97361142e84182b495ebf48c2f3f5e6c06e119f2f3231a9fdf78e"
 dependencies = [
  "thiserror",
  "vespertide-core",
@@ -3119,9 +3119,9 @@ dependencies = [
 
 [[package]]
 name = "vespertide-query"
-version = "0.1.38"
+version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78d0b7df6cd858bbda5b88355031843a34ddf5b27dfc41b299a2f43027994a9b"
+checksum = "1f69cd22574cc4d003a3aacad96934b6a739a1f2f9fbaa931d273499f391ea05"
 dependencies = [
  "sea-query 0.32.7",
  "thiserror",
@@ -3475,18 +3475,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.34"
+version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71ddd76bcebeed25db614f82bf31a9f4222d3fbba300e6fb6c00afa26cbd4d9d"
+checksum = "fdea86ddd5568519879b8187e1cf04e24fce28f7fe046ceecbce472ff19a2572"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.34"
+version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8187381b52e32220d50b255276aa16a084ec0a9017a0ca2152a1f55c539758d"
+checksum = "0c15e1b46eff7c6c91195752e0eeed8ef040e391cdece7c25376957d5f15df22"
 dependencies = [
  "proc-macro2",
  "quote",
