@@ -1,0 +1,113 @@
+services:
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+      - ${PORT:-80}:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      - CLOUDFRONT_URL=${CLOUDFRONT_URL:-https://localhost}
+    command: >
+      /bin/sh -c "envsubst '$$CLOUDFRONT_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+    depends_on:
+      api:
+        condition: service_healthy
+      ai:
+        condition: service_healthy
+      node:
+        condition: service_healthy
+
+  node:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - 3000
+      - 3001
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -q --spider http://node:3000 || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+
+  api:
+    build:
+      # 빌드 컨텍스트: backend 폴더
+      context: ./backend
+      # Dockerfile 위치: backend/Dockerfile
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - 8000
+    ports:
+      - "8000:8000"
+    environment:
+      # PostgreSQL 연결 URL
+      # postgres:5432 - Docker Compose 내부 네트워크에서 postgres 서비스 참조
+      - DATABASE_URL=postgresql://aegis_user:${POSTGRES_PASSWORD:-changeme}@postgres:5432/aegis_link_db
+      # 포트 설정
+      - PORT=8000
+    # PostgreSQL이 준비된 후에 API 시작
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD", "sh", "-c", "wget -q --spider http://api:8000/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s # Rust 빌드 시간 고려
+
+  ai:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - 8001
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test:
+        ["CMD", "sh", "-c", "wget -q --spider http://ai:8001/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # PostgreSQL 데이터베이스 서비스
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      # 데이터베이스 이름
+      POSTGRES_DB: aegis_link_db
+      # 사용자 이름
+      POSTGRES_USER: aegis_user
+      # 비밀번호 (환경변수로 받음)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      # 데이터 영속성: 컨테이너가 삭제되어도 데이터 보존
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # 외부에서 접근 가능하도록 포트 노출 (개발용)
+      - "5432:5432"
+    healthcheck:
+      # PostgreSQL이 준비되었는지 확인
+      test: ["CMD-SHELL", "pg_isready -U aegis_user -d aegis_link_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# 볼륨 정의 (데이터 저장소)
+volumes:
+  postgres_data:
+    # Docker가 관리하는 영구 저장소
