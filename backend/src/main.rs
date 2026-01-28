@@ -24,7 +24,8 @@ async fn main() -> anyhow::Result<()> {
         openapi = "openapi.json",
         title = "Aegis Link API - URL Reputation Management",
         version = "1.0.0",
-        docs_url = "/docs"
+        docs_url = "/docs",
+        dir = "routes"
     )
     .with_state(db.clone());
 
