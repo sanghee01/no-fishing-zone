@@ -3,7 +3,7 @@ use axum::{
     http::StatusCode,
     Json,
 };
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use vespera::Schema;
 
@@ -86,15 +86,27 @@ pub async fn create_url_reputation(
         is_black: Set(payload.is_black),
     };
     
-    let result = model
-        .save(&db)
+    let result = UrlReputations::insert(model)
+        .on_conflict(
+            sea_orm::sea_query::OnConflict::column(url_reputations_vespertide::Column::Url)
+                .update_columns([
+                    url_reputations_vespertide::Column::Description,
+                    url_reputations_vespertide::Column::Score,
+                    url_reputations_vespertide::Column::IsBlack,
+                ])
+                .to_owned(),
+        )
+        .exec_with_returning(&db)
         .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|e| {
+            println!("❌ Database error: {:?}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
     
     Ok(Json(UrlReputationResponse {
-        url: result.url.unwrap(),
-        description: result.description.unwrap(),
-        score: result.score.unwrap(),
-        is_black: result.is_black.unwrap(),
+        url: result.url,
+        description: result.description,
+        score: result.score,
+        is_black: result.is_black,
     }))
 }
