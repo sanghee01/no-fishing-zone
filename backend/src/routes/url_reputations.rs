@@ -51,11 +51,22 @@ pub async fn get_url_reputation(
     State(db): State<DatabaseConnection>,
     Query(query): Query<GetUrlQuery>,
 ) -> Result<Json<UrlReputationResponse>, StatusCode> {
+    println!("🔍 Searching for URL reputation: [{}]", query.url);
+    
     let result = UrlReputations::find()
         .filter(url_reputations_vespertide::Column::Url.eq(&query.url))
         .one(&db)
         .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|e| {
+            println!("❌ Database query error: {:?}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+    
+    if let Some(ref model) = result {
+        println!("✅ Found: {}", model.url);
+    } else {
+        println!("⚠️ Not found in DB: {}", query.url);
+    }
     
     match result {
         Some(model) => Ok(Json(UrlReputationResponse {
