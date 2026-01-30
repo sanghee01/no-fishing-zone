@@ -1,41 +1,4 @@
 services:
-  nginx:
-    image: nginx
-    restart: always
-    ports:
-      - ${PORT:-80}:80
-    volumes:
-      - ./nginx.conf:/etc/nginx/templates/default.conf.template:ro
-    environment:
-      - CLOUDFRONT_URL=${CLOUDFRONT_URL:-https://localhost}
-    command: >
-      /bin/sh -c "envsubst '$$CLOUDFRONT_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
-    depends_on:
-      api:
-        condition: service_healthy
-      ai:
-        condition: service_healthy
-      node:
-        condition: service_healthy
-
-  node:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    restart: always
-    expose:
-      - 3000
-      - 3001
-    ports:
-      - "3000:3000"
-      - "3001:3001"
-    healthcheck:
-      test: ["CMD", "sh", "-c", "wget -q --spider http://node:3000 || exit 1"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 5s
-
   api:
     build:
       # 빌드 컨텍스트: backend 폴더
@@ -72,13 +35,15 @@ services:
 
   ai:
     build:
-      context: ./ai
+      context: ./react-ai
       dockerfile: Dockerfile
     restart: always
     expose:
       - 8001
     ports:
       - "8001:8001"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     healthcheck:
       test:
         ["CMD", "sh", "-c", "wget -q --spider http://ai:8001/health || exit 1"]
@@ -86,7 +51,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
-
   # PostgreSQL 데이터베이스 서비스
   postgres:
     image: postgres:16-alpine
