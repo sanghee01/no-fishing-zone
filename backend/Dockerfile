@@ -2,7 +2,13 @@
 # 1단계: 빌드 스테이지
 # ============================================
 # Rust 컴파일러가 포함된 공식 이미지 사용
-FROM rustlang/rust:nightly AS builder
+# Rust 컴파일러가 포함된 공식 이미지 사용 (Debian Bookworm 기반으로 통일하여 GLIBC 버전 일치)
+FROM rustlang/rust:nightly-bookworm-slim AS builder
+
+# 필수 빌드 도구 설치 (OpenSSL, pkg-config 등)
+RUN apt-get update && \
+    apt-get install -y pkg-config libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # 작업 디렉토리 설정
 WORKDIR /app
