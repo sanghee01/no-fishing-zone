@@ -1,0 +1,17 @@
+[project]
+name = "search-ai"
+version = "0.1.0"
+description = "Aegis Link 지능형 도메인 홉 크롤러 - 능동적 위협 수집 에이전트"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx[http2]>=0.28.0",      # 비동기 HTTP 클라이언트 (HTTP/2 지원)
+    "beautifulsoup4>=4.14.0",    # HTML 파싱
+    "tldextract>=5.3.0",         # Apex 도메인 추출
+    "fake-useragent>=2.0.0",     # User-Agent 로테이션
+    "aiofiles>=24.0.0",          # 비동기 파일 I/O
+    "python-dotenv>=1.0.0",      # 환경 변수 관리
+]
+
+[project.scripts]
+search-ai = "main:main"
