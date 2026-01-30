@@ -37,7 +37,7 @@
         "tags": [
           "url-reputations"
         ],
-        "description": "URL 평판 정보 조회\n\n사용자가 URL 클릭 시 해당 URL의 안전성을 확인하기 위해 사용합니다.\nDB에 해당 URL이 없으면 404를 반환합니다.",
+        "description": "URL 평판 정보 조회\n\n사용자가 URL 클릭 시 해당 URL의 안전성을 확인하기 위해 사용합니다.\nDB에 해당 URL이 없으면 AI 서버에 분석을 요청하고 결과를 저장 후 반환합니다.\nAI 서버 분석 결과는 DB에 저장됩니다.",
         "parameters": [
           {
             "name": "url",
@@ -121,11 +121,11 @@
             "type": "string",
             "nullable": true
           },
-          "is_black": {
-            "type": "boolean"
-          },
           "score": {
             "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UrlStatus"
           },
           "url": {
             "type": "string"
@@ -134,7 +134,7 @@
         "required": [
           "url",
           "score",
-          "is_black"
+          "status"
         ]
       },
       "GetUrlQuery": {
@@ -155,11 +155,11 @@
             "type": "string",
             "nullable": true
           },
-          "is_black": {
-            "type": "boolean"
-          },
           "score": {
             "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UrlStatus"
           },
           "url": {
             "type": "string"
@@ -168,7 +168,15 @@
         "required": [
           "url",
           "score",
-          "is_black"
+          "status"
+        ]
+      },
+      "UrlStatus": {
+        "type": "string",
+        "enum": [
+          "SAFE",
+          "WARNING",
+          "BLOCK"
         ]
       }
     }

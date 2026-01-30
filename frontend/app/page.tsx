@@ -8,7 +8,7 @@ type UrlReputationResponse = {
   url: string;
   description: string | null;
   score: number;
-  is_black: boolean;
+  status: "SAFE" | "WARNING" | "BLOCK";
 };
 
 function UrlReputationContent() {
@@ -39,7 +39,7 @@ function UrlReputationContent() {
             url: response.data.url,
             description: response.data.description ?? null,
             score: response.data.score as number,
-            is_black: response.data.is_black as boolean,
+            status: response.data.status as "SAFE" | "WARNING" | "BLOCK",
           });
         } else if (response.response?.status === 404) {
           setNotFound(true);
@@ -115,11 +115,21 @@ function UrlReputationContent() {
       {data && !loading && (
         <div style={{ marginTop: "1rem" }}>
           <h2>평판 정보</h2>
-          {/* ... 기존 결과 UI ... */}
           <div
             style={{
-              background: data.is_black ? "#fee2e2" : "#dcfce7",
-              border: `2px solid ${data.is_black ? "#dc2626" : "#16a34a"}`,
+              background:
+                data.status === "BLOCK"
+                  ? "#fee2e2"
+                  : data.status === "WARNING"
+                    ? "#fef3c7"
+                    : "#dcfce7",
+              border: `2px solid ${
+                data.status === "BLOCK"
+                  ? "#dc2626"
+                  : data.status === "WARNING"
+                    ? "#f59e0b"
+                    : "#16a34a"
+              }`,
               padding: "1.5rem",
               borderRadius: "8px",
               marginTop: "1rem",
@@ -137,11 +147,20 @@ function UrlReputationContent() {
               <strong>상태:</strong>{" "}
               <span
                 style={{
-                  color: data.is_black ? "#dc2626" : "#16a34a",
+                  color:
+                    data.status === "BLOCK"
+                      ? "#dc2626"
+                      : data.status === "WARNING"
+                        ? "#f59e0b"
+                        : "#16a34a",
                   fontWeight: "bold",
                 }}
               >
-                {data.is_black ? "⚠️ 블랙리스트" : "✅ 안전"}
+                {data.status === "BLOCK"
+                  ? "🚫 차단 권장"
+                  : data.status === "WARNING"
+                    ? "⚠️ 경고"
+                    : "✅ 안전"}
               </span>
             </div>
 

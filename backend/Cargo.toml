@@ -13,3 +13,5 @@ vespertide = "0.1"
 sea-orm = { version = "2.0.0-rc", features = ["runtime-tokio-native-tls", "sqlx-postgres", "macros"] }
 anyhow = "1"
 tower-http = { version = "0.6.8", features = ["cors"] }
+reqwest = { version = "0.13.1", features = ["json"] }
+uuid = { version = "1.20.0", features = ["v4"] }
