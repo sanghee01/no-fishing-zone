@@ -20,10 +20,14 @@
       "index": true
     },
     {
-      "name": "is_black",
-      "type": "boolean",
+      "name": "status",
+      "type": {
+        "kind": "enum",
+        "name": "url_status",
+        "values": ["SAFE", "WARNING", "BLOCK"]
+      },
       "nullable": false,
-      "default": "false"
+      "default": "SAFE"
     }
   ]
 }

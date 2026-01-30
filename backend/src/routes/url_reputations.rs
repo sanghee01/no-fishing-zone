@@ -7,7 +7,7 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use vespera::Schema;
 
-use crate::models::url_reputations_vespertide::{self, Entity as UrlReputations};
+use crate::models::url_reputations_vespertide::{self, Entity as UrlReputations, UrlStatus};
 
 /// URL 평판 정보 응답 스키마
 #[derive(Serialize, Deserialize, Schema, Debug, Clone)]
@@ -18,8 +18,8 @@ pub struct UrlReputationResponse {
     pub description: Option<String>,
     /// 평판 점수 (0-100)
     pub score: i32,
-    /// 블랙리스트 여부
-    pub is_black: bool,
+    /// URL 상태 (SAFE | WARNING | BLOCK)
+    pub status: UrlStatus,
 }
 
 /// URL 평판 정보 생성/업데이트 요청 스키마
@@ -31,8 +31,8 @@ pub struct CreateUrlReputation {
     pub description: Option<String>,
     /// 평판 점수 (0-100)
     pub score: i32,
-    /// 블랙리스트 여부
-    pub is_black: bool,
+    /// URL 상태 (SAFE | WARNING | BLOCK)
+    pub status: UrlStatus,
 }
 
 /// URL 조회 쿼리 파라미터
@@ -73,7 +73,7 @@ pub async fn get_url_reputation(
             url: model.url,
             description: model.description,
             score: model.score,
-            is_black: model.is_black,
+            status: model.status,
         })),
         None => Err(StatusCode::NOT_FOUND),
     }
@@ -94,7 +94,7 @@ pub async fn create_url_reputation(
         url: Set(payload.url.clone()),
         description: Set(payload.description.clone()),
         score: Set(payload.score),
-        is_black: Set(payload.is_black),
+        status: Set(payload.status),
     };
     
     let result = UrlReputations::insert(model)
@@ -103,7 +103,7 @@ pub async fn create_url_reputation(
                 .update_columns([
                     url_reputations_vespertide::Column::Description,
                     url_reputations_vespertide::Column::Score,
-                    url_reputations_vespertide::Column::IsBlack,
+                    url_reputations_vespertide::Column::Status,
                 ])
                 .to_owned(),
         )
@@ -118,6 +118,6 @@ pub async fn create_url_reputation(
         url: result.url,
         description: result.description,
         score: result.score,
-        is_black: result.is_black,
+        status: result.status,
     }))
 }

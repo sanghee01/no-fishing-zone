@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dev-five-git/vespertide/refs/heads/main/schemas/migration.schema.json",
+  "actions": [
+    {
+      "column": "is_black",
+      "table": "url_reputations",
+      "type": "delete_column"
+    },
+    {
+      "column": {
+        "default": "SAFE",
+        "name": "status",
+        "nullable": false,
+        "type": {
+          "kind": "enum",
+          "name": "url_status",
+          "values": [
+            "SAFE",
+            "WARNING",
+            "BLOCK"
+          ]
+        }
+      },
+      "fill_with": null,
+      "table": "url_reputations",
+      "type": "add_column"
+    }
+  ],
+  "comment": "Change is_black to status enum (SAFE/WARNING/BLOCK)",
+  "created_at": "2026-01-30T05:47:56Z",
+  "version": 2
+}
