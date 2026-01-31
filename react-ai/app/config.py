@@ -66,7 +66,7 @@ SUSPICIOUS_TLDS = {"xyz", "top", "pw", "icu", "loan", "cam", "club", "online", "
 # Phase 3: AI 분석 설정
 # ============================================
 AI_SCORE_MULTIPLIER = 30  # AI 위험도(0.0~1.0)에 곱해서 점수화 (최대 30점)
-CLAUDE_MODEL = "claude-3-5-haiku-20241022"  # 사용할 Claude 모델 (비용 효율적인 Haiku)
+CLAUDE_MODEL = "claude-haiku-4-5-20251001"  # 사용할 Claude 모델 (Claude 4.5 Haiku 스테이블, 2025-10-01)
 
 # ============================================
 # Phase 4: 검색 엔진 검증 설정
