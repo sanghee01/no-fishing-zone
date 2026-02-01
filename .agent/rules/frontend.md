@@ -1,4 +1,5 @@
 ---
+trigger: model_decision
 description: This rule is triggered when working on the frontend code.
 ---
 
