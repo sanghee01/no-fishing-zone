@@ -1,10 +1,14 @@
 use axum::{
     extract::{Query, State},
     http::StatusCode,
+    response::sse::{Event, Sse},
     Json,
 };
+use futures::stream::{self, Stream};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
+use std::convert::Infallible;
+use std::time::Duration;
 use vespera::Schema;
 
 use crate::models::url_reputations_vespertide::{self, Entity as UrlReputations, UrlStatus};
@@ -220,4 +224,246 @@ async fn upsert_url_reputation(
         )
         .exec_with_returning(db)
         .await
+}
+
+/// SSE 진행 상태 이벤트
+#[derive(Serialize, Clone)]
+struct ProgressEvent {
+    step: u8,
+    status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    result: Option<UrlReputationResponse>,
+    done: bool,
+}
+
+/// URL 분석 스트림 (SSE)
+/// 
+/// 실시간으로 분석 진행 상태를 전송합니다.
+/// - step 1: 접속 기록 분석 (DB 조회)
+/// - step 2: 불법 데이터 식별 (AI 분석)
+/// - step 3: 증거 자료 수집 (결과 저장)
+pub async fn analyze_stream(
+    State(db): State<DatabaseConnection>,
+    Query(query): Query<GetUrlQuery>,
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let url = query.url.clone();
+    
+    let stream = stream::unfold(
+        AnalyzeState::Start { db, url },
+        |state| async move {
+            match state {
+                AnalyzeState::Start { db, url } => {
+                    // Step 1: DB 조회 시작
+                    let event = ProgressEvent {
+                        step: 1,
+                        status: "in_progress".to_string(),
+                        result: None,
+                        done: false,
+                    };
+                    Some((
+                        Ok(Event::default().json_data(&event).unwrap()),
+                        AnalyzeState::CheckDb { db, url },
+                    ))
+                }
+                AnalyzeState::CheckDb { db, url } => {
+                    // DB에서 조회
+                    let result = UrlReputations::find()
+                        .filter(url_reputations_vespertide::Column::Url.eq(&url))
+                        .one(&db)
+                        .await
+                        .ok()
+                        .flatten();
+                    
+                    if let Some(model) = result {
+                        // DB에 있음 - 모든 단계 완료
+                        let response = UrlReputationResponse {
+                            url: model.url,
+                            description: model.description,
+                            score: model.score,
+                            status: model.status,
+                        };
+                        let event = ProgressEvent {
+                            step: 3,
+                            status: "completed".to_string(),
+                            result: Some(response),
+                            done: true,
+                        };
+                        Some((
+                            Ok(Event::default().json_data(&event).unwrap()),
+                            AnalyzeState::Done,
+                        ))
+                    } else {
+                        // DB에 없음 - Step 1 완료, Step 2 시작
+                        let event = ProgressEvent {
+                            step: 1,
+                            status: "completed".to_string(),
+                            result: None,
+                            done: false,
+                        };
+                        Some((
+                            Ok(Event::default().json_data(&event).unwrap()),
+                            AnalyzeState::StartAi { db, url },
+                        ))
+                    }
+                }
+                AnalyzeState::StartAi { db, url } => {
+                    // Step 2: AI 분석 시작
+                    let event = ProgressEvent {
+                        step: 2,
+                        status: "in_progress".to_string(),
+                        result: None,
+                        done: false,
+                    };
+                    Some((
+                        Ok(Event::default().json_data(&event).unwrap()),
+                        AnalyzeState::CallAi { db, url },
+                    ))
+                }
+                AnalyzeState::CallAi { db, url } => {
+                    // AI 서버 호출
+                    let client = reqwest::Client::new();
+                    let ai_server_url = std::env::var("AI_SERVER_URL")
+                        .unwrap_or_else(|_| "http://ai:8001".to_string());
+                    let request_id = uuid::Uuid::new_v4().to_string();
+                    
+                    let ai_result = client
+                        .post(format!("{}/analyze", ai_server_url))
+                        .json(&serde_json::json!({
+                            "url": url,
+                            "request_id": request_id
+                        }))
+                        .send()
+                        .await;
+                    
+                    match ai_result {
+                        Ok(response) if response.status().is_success() => {
+                            #[derive(Deserialize)]
+                            struct AiResponse {
+                                url: String,
+                                status: String,
+                                risk_score: i32,
+                                reasons: Option<Vec<String>>,
+                            }
+                            
+                            if let Ok(ai_data) = response.json::<AiResponse>().await {
+                                let status_enum = match ai_data.status.as_str() {
+                                    "SAFE" => UrlStatus::SAFE,
+                                    "WARNING" => UrlStatus::WARNING,
+                                    _ => UrlStatus::BLOCK,
+                                };
+                                let description = ai_data.reasons
+                                    .filter(|r| !r.is_empty())
+                                    .map(|r| r.join(", "));
+                                
+                                // Step 2 완료
+                                let event = ProgressEvent {
+                                    step: 2,
+                                    status: "completed".to_string(),
+                                    result: None,
+                                    done: false,
+                                };
+                                Some((
+                                    Ok(Event::default().json_data(&event).unwrap()),
+                                    AnalyzeState::SaveResult {
+                                        db,
+                                        url: ai_data.url,
+                                        description,
+                                        score: ai_data.risk_score,
+                                        status: status_enum,
+                                    },
+                                ))
+                            } else {
+                                // 파싱 실패
+                                Some((
+                                    Ok(Event::default().data("error: AI response parse failed")),
+                                    AnalyzeState::Done,
+                                ))
+                            }
+                        }
+                        _ => {
+                            // AI 호출 실패
+                            Some((
+                                Ok(Event::default().data("error: AI server error")),
+                                AnalyzeState::Done,
+                            ))
+                        }
+                    }
+                }
+                AnalyzeState::SaveResult { db, url, description, score, status } => {
+                    // Step 3: 결과 저장 시작
+                    let event = ProgressEvent {
+                        step: 3,
+                        status: "in_progress".to_string(),
+                        result: None,
+                        done: false,
+                    };
+                    Some((
+                        Ok(Event::default().json_data(&event).unwrap()),
+                        AnalyzeState::DoSave { db, url, description, score, status },
+                    ))
+                }
+                AnalyzeState::DoSave { db, url, description, score, status } => {
+                    // DB에 저장
+                    let save_result = upsert_url_reputation(&db, url, description, score, status.clone()).await;
+                    
+                    match save_result {
+                        Ok(model) => {
+                            let response = UrlReputationResponse {
+                                url: model.url,
+                                description: model.description,
+                                score: model.score,
+                                status: model.status,
+                            };
+                            let event = ProgressEvent {
+                                step: 3,
+                                status: "completed".to_string(),
+                                result: Some(response),
+                                done: true,
+                            };
+                            Some((
+                                Ok(Event::default().json_data(&event).unwrap()),
+                                AnalyzeState::Done,
+                            ))
+                        }
+                        Err(_) => {
+                            Some((
+                                Ok(Event::default().data("error: DB save failed")),
+                                AnalyzeState::Done,
+                            ))
+                        }
+                    }
+                }
+                AnalyzeState::Done => None,
+            }
+        },
+    );
+    
+    Sse::new(stream).keep_alive(
+        axum::response::sse::KeepAlive::new()
+            .interval(Duration::from_secs(10))
+            .text("keep-alive"),
+    )
+}
+
+/// 분석 상태 머신
+enum AnalyzeState {
+    Start { db: DatabaseConnection, url: String },
+    CheckDb { db: DatabaseConnection, url: String },
+    StartAi { db: DatabaseConnection, url: String },
+    CallAi { db: DatabaseConnection, url: String },
+    SaveResult {
+        db: DatabaseConnection,
+        url: String,
+        description: Option<String>,
+        score: i32,
+        status: UrlStatus,
+    },
+    DoSave {
+        db: DatabaseConnection,
+        url: String,
+        description: Option<String>,
+        score: i32,
+        status: UrlStatus,
+    },
+    Done,
 }

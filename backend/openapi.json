@@ -16,7 +16,7 @@
         "tags": [
           "system"
         ],
-        "description": "/ Health Check 엔드포인트\n/ \n/ Docker의 healthcheck에서 사용됩니다.\n/ 서버가 정상적으로 실행 중인지 확인하는 간단한 엔드포인트입니다.",
+        "description": "Health Check 엔드포인트\n\nDocker의 healthcheck에서 사용됩니다.\n서버가 정상적으로 실행 중인지 확인하는 간단한 엔드포인트입니다.",
         "responses": {
           "200": {
             "description": "Successful response",
@@ -37,7 +37,7 @@
         "tags": [
           "url-reputations"
         ],
-        "description": "/ URL 평판 정보 조회\n/ \n/ 사용자가 URL 클릭 시 해당 URL의 안전성을 확인하기 위해 사용합니다.\n/ DB에 해당 URL이 없으면 AI 서버에 분석을 요청하고 결과를 저장 후 반환합니다.\n/ AI 서버 분석 결과는 DB에 저장됩니다.",
+        "description": "URL 평판 정보 조회\n\n사용자가 URL 클릭 시 해당 URL의 안전성을 확인하기 위해 사용합니다.\nDB에 해당 URL이 없으면 AI 서버에 분석을 요청하고 결과를 저장 후 반환합니다.\nAI 서버 분석 결과는 DB에 저장됩니다.",
         "parameters": [
           {
             "name": "url",
@@ -76,7 +76,7 @@
         "tags": [
           "url-reputations"
         ],
-        "description": "/ URL 평판 정보 등록/업데이트\n/ \n/ AI Agent가 수집한 URL 정보를 DB에 저장합니다.\n/ 이미 존재하는 URL이면 업데이트하고, 없으면 새로 생성합니다.",
+        "description": "URL 평판 정보 등록/업데이트\n\nAI Agent가 수집한 URL 정보를 DB에 저장합니다.\n이미 존재하는 URL이면 업데이트하고, 없으면 새로 생성합니다.",
         "requestBody": {
           "required": true,
           "content": {

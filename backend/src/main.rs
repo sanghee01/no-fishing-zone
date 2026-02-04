@@ -1,6 +1,7 @@
 use sea_orm::Database;
 use vespera::vespera;
 use tower_http::cors::CorsLayer;
+use axum::routing::get;
 
 mod routes;
 mod models;
@@ -32,7 +33,15 @@ async fn run() -> anyhow::Result<()> {
     // 3. CORS 설정 (모든 오리진, 메서드, 헤더 허용)
     let cors = CorsLayer::permissive();
 
-    // 4. Vespera 앱 설정 (CORS 레이어 추가)
+    // 4. SSE 라우터 (Vespera 외부)
+    let sse_router = axum::Router::new()
+        .route(
+            "/url-reputations/analyze-stream",
+            get(routes::url_reputations::analyze_stream),
+        )
+        .with_state(db.clone());
+
+    // 5. Vespera 앱 설정 + SSE 라우터 merge
     let app = vespera!(
         openapi = "openapi.json",
         title = "Aegis Link API - URL Reputation Management",
@@ -41,6 +50,7 @@ async fn run() -> anyhow::Result<()> {
         dir = "routes"
     )
     .with_state(db.clone())
+    .merge(sse_router)
     .layer(cors);
 
     // 5. 서버 시작 (기본 포트 8000)
