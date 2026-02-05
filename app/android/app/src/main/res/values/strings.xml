@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Aegis Link</string>
+    <string name="accessibility_service_description">Aegis Link monitors your screen for suspicious URLs in messaging apps and browsers to protect you from smishing attacks. This service runs in the background and displays a warning overlay when a potentially dangerous link is detected.</string>
+</resources>

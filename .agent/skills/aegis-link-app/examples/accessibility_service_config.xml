@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    AccessibilityService 설정 파일
+    위치: android/app/src/main/res/xml/accessibility_service_config.xml
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeViewTextChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagIncludeNotImportantViews"
+    android:canRetrieveWindowContent="true"
+    android:notificationTimeout="100"
+    android:description="@string/accessibility_service_description"
+    android:settingsActivity="com.aegislink.app.SettingsActivity"
+    android:packageNames="com.samsung.android.messaging,com.google.android.apps.messaging,com.kakao.talk,com.android.chrome,org.mozilla.firefox,com.sec.android.app.sbrowser" />
+
+<!--
+    속성 설명:
+    
+    - accessibilityEventTypes: 감지할 이벤트 타입
+        * typeWindowContentChanged: 화면 내용 변경 시
+        * typeViewTextChanged: 텍스트 입력 변경 시
+        
+    - accessibilityFeedbackType: 피드백 타입 (generic 권장)
+    
+    - accessibilityFlags:
+        * flagReportViewIds: 뷰 ID 포함
+        * flagIncludeNotImportantViews: 모든 뷰 포함 (URL 감지에 필요)
+        
+    - canRetrieveWindowContent: 화면 내용 읽기 권한 (필수)
+    
+    - notificationTimeout: 이벤트 수신 간격 (ms), 배터리 절약을 위해 100ms 권장
+    
+    - packageNames: 모니터링 대상 앱 패키지명 (쉼표로 구분)
+        * 빈 값이면 모든 앱 모니터링 (비권장, 배터리 소모 큼)
+-->
