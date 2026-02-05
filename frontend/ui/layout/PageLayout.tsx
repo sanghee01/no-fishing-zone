@@ -55,7 +55,7 @@ export function PageLayoutFooter() {
     <Center
       bg="$white"
       borderTop="solid 1px"
-      borderTopColor="$border"
+      borderTopColor="$gray"
       w="100%"
       py={["16px", null, null, null, "64px"]}
     >

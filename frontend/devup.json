@@ -4,6 +4,7 @@
       "default": {
         "black": "#000000",
         "white": "#FFFFFF",
+        "gray": "#E1E1E1",
         "text": "1A1A1A",
         "textLight": "#153556B2",
         "disabled": "#CCC",
@@ -12,8 +13,7 @@
         "danger": "#E00E05",
         "safe": "#22C55E",
         "warning": "#FFB200",
-        "background": "#F8FAFC",
-        "border": "#E1E1E1"
+        "background": "#F8FAFC"
       }
     },
     "shadows": {
