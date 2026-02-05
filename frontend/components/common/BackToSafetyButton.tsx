@@ -1,19 +1,27 @@
-"use client";
+import { Flex, Image, Text } from "@devup-ui/react";
 
 export function BackToSafetyButton() {
-  const handleClick = () => {
-    // 브라우저 히스토리가 있으면 뒤로가기, 없으면 창 닫기 시도
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.close();
-    }
-  };
-
   return (
-    <button type="button" onClick={handleClick} className="btn btn-primary">
-      <span className="btn-icon">↩</span>
-      안전한 페이지로 돌아가기
-    </button>
+    <Flex
+      as="a"
+      href="https://www.google.com"
+      alignItems="center"
+      justifyContent="center"
+      gap="12px"
+      bg="$primary"
+      color="white"
+      px={["24px", null, null, null, "32px"]}
+      py={["16px", null, null, null, "20px"]}
+      borderRadius="15px"
+      boxShadow="0 5px 15px 0 rgba(0, 0, 0, 0.25)"
+      textDecoration="none"
+      cursor="pointer"
+      _hover={{ bg: "#00284F" }}
+    >
+      <Image src="/images/shield-icon.png" alt="" boxSize="24px" />
+      <Text fontWeight="700" fontSize={["15px", null, null, null, "18px"]}>
+        안전한 페이지로 돌아가기
+      </Text>
+    </Flex>
   );
 }

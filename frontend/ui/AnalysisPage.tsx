@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LoadingView, type StepStatus } from "./LoadingView";
+import { AnalysisView, type StepStatus } from "./AnalysisView";
 import { DangerView } from "./DangerView";
 import { CautionView } from "./CautionView";
 import { SafeView } from "./SafeView";
@@ -20,8 +20,9 @@ interface AnalysisState {
 }
 
 /**
- * 분석 페이지 - SSE 연결 및 상태 관리
- * 클라이언트 컴포넌트
+ * 분석 흐름 관리 (Analysis Flow)
+ * - 분석 진행 상태 (AnalysisView) 및 결과 (Safe/Caution/Danger) 렌더링
+ * - SSE 연결 및 상태 관리 담당
  */
 export function AnalysisPage({ url }: AnalysisPageProps) {
   const [state, setState] = useState<AnalysisState>({
@@ -142,6 +143,6 @@ export function AnalysisPage({ url }: AnalysisPageProps) {
   }
 
   return (
-    <LoadingView step1={state.step1} step2={state.step2} step3={state.step3} />
+    <AnalysisView step1={state.step1} step2={state.step2} step3={state.step3} />
   );
 }

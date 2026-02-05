@@ -2,12 +2,6 @@
  * 전역 CSS 변수 정의
  */
 :root {
-  /* 색상 */
-  --background: #ffffff;
-  --foreground: #171717;
-  --border: #e5e7eb;
-  --muted: #f3f4f6;
-
   /* 간격 */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -23,18 +17,10 @@
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --border: #262626;
-    --muted: #171717;
-  }
-}
-
 /**
  * 기본 리셋 및 스타일
  */
+
 * {
   box-sizing: border-box;
   margin: 0;
