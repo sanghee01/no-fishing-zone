@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LoadingView, type StepStatus } from "./LoadingView";
+import { AnalysisView, type StepStatus } from "./AnalysisView";
 import { DangerView } from "./DangerView";
 import { CautionView } from "./CautionView";
 import { SafeView } from "./SafeView";
 import type { UrlReputationResponse } from "@/lib/api";
 
-interface AnalysisPageProps {
+interface AnalysisClientProps {
   url: string;
 }
 
@@ -20,10 +20,12 @@ interface AnalysisState {
 }
 
 /**
- * 분석 페이지 - SSE 연결 및 상태 관리
- * 클라이언트 컴포넌트
+ * SSE 전용 클라이언트 컴포넌트 (Analysis Client)
+ * - DB에 결과가 없을 때만 사용
+ * - SSE 연결 및 실시간 상태 관리 담당
+ * - 분석 완료 시 결과에 맞는 View 렌더링
  */
-export function AnalysisPage({ url }: AnalysisPageProps) {
+export function AnalysisClient({ url }: AnalysisClientProps) {
   const [state, setState] = useState<AnalysisState>({
     step1: "pending",
     step2: "pending",
@@ -142,6 +144,6 @@ export function AnalysisPage({ url }: AnalysisPageProps) {
   }
 
   return (
-    <LoadingView step1={state.step1} step2={state.step2} step3={state.step3} />
+    <AnalysisView step1={state.step1} step2={state.step2} step3={state.step3} />
   );
 }

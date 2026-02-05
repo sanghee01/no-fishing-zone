@@ -1,9 +1,14 @@
-import { AnalysisPage } from "@/components/AnalysisPage";
+import {
+  PageLayoutRoot,
+  PageLayoutContent,
+  PageLayoutFooter,
+} from "@/ui/layout/PageLayout";
+import { AnalysisClient } from "@/ui/AnalysisClient";
+import { DangerView } from "@/ui/DangerView";
+import { CautionView } from "@/ui/CautionView";
+import { SafeView } from "@/ui/SafeView";
+import { getUrlReputation } from "@/lib/api";
 
-/**
- * 메인 페이지 - URL 파라미터를 추출하여 AnalysisPage에 전달
- * 서버 컴포넌트
- */
 export default async function HomePage({
   searchParams,
 }: {
@@ -15,16 +20,47 @@ export default async function HomePage({
   // URL이 없으면 안내 메시지
   if (!targetUrl) {
     return (
-      <div className="page-container">
-        <main className="main-content">
-          <h1>URL 평판 조회</h1>
-          <p>조회할 URL을 입력해주세요.</p>
-          <p className="hint">예시: ?url=https://example.com</p>
-        </main>
-      </div>
+      <PageLayoutRoot>
+        <PageLayoutContent>
+          <div style={{ marginTop: "100px", textAlign: "center" }}>
+            <h1
+              style={{
+                fontSize: "2.5rem",
+                fontWeight: "800",
+                marginBottom: "1rem",
+                color: "#1E293B",
+              }}
+            >
+              URL 평판 조회
+            </h1>
+            <p style={{ fontSize: "1.2rem", color: "#64748B" }}>
+              조회할 URL을 입력해주세요.
+            </p>
+            <p style={{ marginTop: "2rem", color: "#94A3B8" }}>
+              예시: ?url=https://example.com
+            </p>
+          </div>
+        </PageLayoutContent>
+        <PageLayoutFooter />
+      </PageLayoutRoot>
     );
   }
 
-  // URL이 있으면 분석 페이지 표시
-  return <AnalysisPage url={targetUrl} />;
+  // 서버에서 DB 조회: 이미 분석된 결과가 있는지 확인
+  const existingResult = await getUrlReputation(targetUrl);
+
+  if (existingResult) {
+    // 결과가 있으면 SSR로 즉시 렌더링 (CSR 불필요)
+    switch (existingResult.status) {
+      case "BLOCK":
+        return <DangerView data={existingResult} />;
+      case "WARNING":
+        return <CautionView data={existingResult} url={targetUrl} />;
+      case "SAFE":
+        return <SafeView data={existingResult} url={targetUrl} />;
+    }
+  }
+
+  // 결과가 없으면 SSE 분석 시작 (CSR 필요)
+  return <AnalysisClient url={targetUrl} />;
 }

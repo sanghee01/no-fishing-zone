@@ -1,0 +1,160 @@
+{
+  "theme": {
+    "colors": {
+      "default": {
+        "black": "#000000",
+        "white": "#FFFFFF",
+        "gray": "#E1E1E1",
+        "text": "1A1A1A",
+        "textLight": "#153556B2",
+        "disabled": "#CCC",
+        "primary": "#003366",
+        "primaryLight": "#E2E8F0",
+        "danger": "#E00E05",
+        "safe": "#22C55E",
+        "warning": "#FFB200",
+        "background": "#F8FAFC"
+      }
+    },
+    "shadows": {
+      "default": "0 10px 20px 0 #0000001A",
+      "card": "0 2px 5px 0 #0000001A"
+    },
+    "typography": {
+      "h2": [
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 700,
+          "fontSize": "24px",
+          "lineHeight": "normal",
+          "letterSpacing": "0.15em"
+        },
+        null,
+        null,
+        null,
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 700,
+          "fontSize": "48px",
+          "lineHeight": "normal",
+          "letterSpacing": "-0.05em"
+        },
+        null
+      ],
+      "h3": [
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 350,
+          "fontSize": "13px",
+          "lineHeight": "normal",
+          "letterSpacing": "0em"
+        },
+        null,
+        null,
+        null,
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 350,
+          "fontSize": "24px",
+          "lineHeight": "normal",
+          "letterSpacing": "0em"
+        },
+        null
+      ],
+      "h4Reg": [
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 350,
+          "fontSize": "15px",
+          "lineHeight": "normal",
+          "letterSpacing": "0em"
+        },
+        null,
+        null,
+        null,
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 350,
+          "fontSize": "20px",
+          "lineHeight": "normal",
+          "letterSpacing": "0em"
+        },
+        null
+      ],
+      "h4": [
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 700,
+          "fontSize": "15px",
+          "lineHeight": "normal",
+          "letterSpacing": "0em"
+        },
+        null,
+        null,
+        null,
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 700,
+          "fontSize": "20px",
+          "lineHeight": "normal",
+          "letterSpacing": "0em"
+        },
+        null
+      ],
+      "h1": [
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 700,
+          "fontSize": "20px",
+          "lineHeight": 1.4,
+          "letterSpacing": "-0.05em"
+        },
+        null,
+        null,
+        null,
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 900,
+          "fontSize": "80px",
+          "lineHeight": "normal",
+          "letterSpacing": "0.3em"
+        },
+        null
+      ],
+      "설명": {
+        "fontFamily": "Noto Sans KR",
+        "fontWeight": 350,
+        "fontSize": "14px",
+        "lineHeight": "normal",
+        "letterSpacing": "0em"
+      },
+      "진행상황": {
+        "fontFamily": "Noto Sans KR",
+        "fontWeight": 700,
+        "fontSize": "18px",
+        "lineHeight": "normal",
+        "letterSpacing": "-0.02em"
+      },
+      "boxDescription": [
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 350,
+          "fontSize": "14px",
+          "lineHeight": 1.6,
+          "letterSpacing": "-0.02em"
+        },
+        null,
+        null,
+        null,
+        {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": 300,
+          "fontSize": "20px",
+          "lineHeight": "normal",
+          "letterSpacing": "0em"
+        },
+        null
+      ]
+    }
+  }
+}
