@@ -1,14 +1,16 @@
+# =============================================
+# Search-AI Ver.3 엔트리 포인트
+# =============================================
+# 타겟 갤러리/게시판으로 좁혀서 수집 효율 극대화
+# SNS(twitter, instagram, facebook)는 코드 레벨에서 차단
+
 # 1. 불법 포털 인덱스 (가장 확실한 소스)
 https://www.joosotok.com/
 https://www.jusocon.com/
-https://www.jusomoa.com/
+https://jusoping2.net/
 https://www.linkmoa.com/
 
-# 2. 링크 트리 계열 (스캠/홍보용으로 다수 활용됨, SNS 대용)
-https://linktr.ee/ (특정 키워드 조합 필요, 예: linktr.ee/totosite 등)
-https://lit.link/
-https://allmy.link/
-
-# 3. 커뮤니티 게시판 (유동 인구가 많은 곳의 홍보 게시판)
-https://www.bobaedream.co.kr/board/bbs/list.php?code=freeb (자유게시판 내 스팸 링크)
-https://www.dcinside.com/ (특정 갤러리의 스팸성 게시글)
+# 2. DC인사이드 타겟 갤러리 (도박/대출/주식 관련 스팸 집중)
+https://gall.dcinside.com/board/lists/?id=lotto_new2
+https://gall.dcinside.com/board/lists?id=loan_new1
+https://gall.dcinside.com/board/lists?id=stock_new2

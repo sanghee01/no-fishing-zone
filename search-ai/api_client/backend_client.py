@@ -89,24 +89,41 @@ class BackendClient:
         if not self._client:
             raise RuntimeError("클라이언트가 초기화되지 않았습니다.")
         
+        # ★ 422 에러 방지: 데이터 형변환
+        safe_score = int(score) if score is not None else 0
+        safe_score = max(0, min(100, safe_score))  # 0-100 범위 보장
+        
+        safe_status = str(status).upper() if status else "SAFE"
+        if safe_status not in ("SAFE", "WARNING", "BLOCK"):
+            safe_status = "SAFE"  # 잘못된 상태는 SAFE로 폴백
+        
+        # description 길이 제한 (500자)
+        safe_description = None
+        if description:
+            safe_description = str(description)[:500]
+        
+        payload = {
+            "url": url,
+            "score": safe_score,
+            "status": safe_status,
+            "description": safe_description
+        }
+        
         async with self.semaphore:
             try:
                 response = await self._client.post(
                     f"{self.base_url}/url-reputations/",
-                    json={
-                        "url": url,
-                        "score": score,
-                        "status": status,
-                        "description": description
-                    }
+                    json=payload
                 )
                 
                 if response.status_code == 200:
                     logger.debug(f"✅ DB 저장 완료: {url}")
                     return True
                 else:
+                    # ★ 422 에러 시 payload 로깅
                     logger.warning(
-                        f"⚠️ DB 저장 실패 [{response.status_code}]: {url}"
+                        f"⚠️ DB 저장 실패 [{response.status_code}]: {url} | "
+                        f"Payload: score={safe_score}, status={safe_status}"
                     )
                     return False
                     

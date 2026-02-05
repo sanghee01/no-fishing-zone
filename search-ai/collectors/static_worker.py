@@ -1,8 +1,13 @@
 """
 ===========================================
-📄 static_worker.py - 정적 데이터 수집기
+📄 static_worker.py - 정적 데이터 수집기 Ver.3.1
 ===========================================
 PhishTank, Tranco 등 정적 데이터를 파싱하여 DB에 적재합니다.
+
+Ver.3.1 수정:
+- URL 길이 검증 (2048자 초과 시 스킵)
+- 배치 카운터 수정
+- 상세 로깅 추가
 """
 
 import asyncio
@@ -15,6 +20,9 @@ from utils.url_normalizer import normalize_url
 from utils.logging_config import get_logger
 
 logger = get_logger()
+
+# URL 최대 길이 (PostgreSQL VARCHAR 및 브라우저 한계 고려)
+MAX_URL_LENGTH = 2048
 
 
 async def load_phishtank_data(
@@ -34,10 +42,13 @@ async def load_phishtank_data(
         URL 평판 정보 딕셔너리 목록
     """
     if not file_path.exists():
-        logger.warning(f"⚠️ PhishTank 파일 없음: {file_path}")
+        logger.warning(f"[Static] ⚠️ PhishTank 파일 없음: {file_path}")
         return
     
-    logger.info(f"📂 PhishTank 데이터 로드 중: {file_path}")
+    logger.info(f"[Static] 📂 PhishTank 데이터 로드 중: {file_path}")
+    
+    skipped_count = 0
+    processed_count = 0
     
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -50,10 +61,11 @@ async def load_phishtank_data(
         elif isinstance(data, list):
             items = data
         else:
-            logger.error("❌ PhishTank 데이터 형식 오류")
+            logger.error("[Static] ❌ PhishTank 데이터 형식 오류")
             return
         
-        logger.info(f"📊 PhishTank 항목 수: {len(items)}")
+        total_items = len(items)
+        logger.info(f"[Static] 📊 PhishTank 항목 수: {total_items}")
         
         batch: list[dict] = []
         
@@ -66,12 +78,22 @@ async def load_phishtank_data(
                 url = item
             
             if not url:
+                skipped_count += 1
                 continue
             
+            # URL 정규화
             normalized = normalize_url(url)
             if not normalized:
+                skipped_count += 1
                 continue
             
+            # ★ URL 길이 검증 (2048자 초과 시 스킵)
+            if len(normalized) > MAX_URL_LENGTH:
+                skipped_count += 1
+                logger.debug(f"[Static] ⏭️ URL 너무 김 ({len(normalized)}자): {normalized[:50]}...")
+                continue
+            
+            processed_count += 1
             batch.append({
                 "url": normalized,
                 "score": 100,  # 피싱 사이트는 최고 위험도
@@ -86,11 +108,13 @@ async def load_phishtank_data(
         # 마지막 배치
         if batch:
             yield batch
+        
+        logger.info(f"[Static] 📊 처리: {processed_count}개, 스킵: {skipped_count}개")
             
     except json.JSONDecodeError as e:
-        logger.error(f"❌ PhishTank JSON 파싱 오류: {e}")
+        logger.error(f"[Static] ❌ PhishTank JSON 파싱 오류: {e}")
     except Exception as e:
-        logger.error(f"❌ PhishTank 로드 오류: {e}")
+        logger.error(f"[Static] ❌ PhishTank 로드 오류: {e}")
 
 
 async def load_whitelist_csv(
@@ -110,10 +134,10 @@ async def load_whitelist_csv(
     domains: set[str] = set()
     
     if not file_path.exists():
-        logger.warning(f"⚠️ 화이트리스트 파일 없음: {file_path}")
+        logger.warning(f"[Static] ⚠️ 화이트리스트 파일 없음: {file_path}")
         return domains
     
-    logger.info(f"📂 화이트리스트 로드 중: {file_path}")
+    logger.info(f"[Static] 📂 화이트리스트 로드 중: {file_path}")
     
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -135,10 +159,10 @@ async def load_whitelist_csv(
                     if domain:
                         domains.add(domain)
         
-        logger.info(f"✅ 화이트리스트 로드 완료: {len(domains)}개 도메인")
+        logger.info(f"[Static] ✅ 화이트리스트 로드 완료: {len(domains)}개 도메인")
         
     except Exception as e:
-        logger.error(f"❌ 화이트리스트 로드 오류: {e}")
+        logger.error(f"[Static] ❌ 화이트리스트 로드 오류: {e}")
     
     return domains
 
@@ -168,7 +192,6 @@ async def import_phishtank_to_db(
     async with BackendClient(base_url=backend_url) as client:
         async for batch in load_phishtank_data(phishtank_path, batch_size):
             batch_num += 1
-            logger.info(f"📤 PhishTank 배치 #{batch_num} 전송 중... ({len(batch)}개)")
             
             success, fail = await client.batch_upsert(
                 items=batch,
@@ -176,14 +199,20 @@ async def import_phishtank_to_db(
                 delay_between_batches=0.05  # 배치 내부 딜레이
             )
             
+            # ★ 누적 카운터 올바르게 갱신
             total_success += success
             total_fail += fail
+            
+            logger.info(
+                f"[Static] 📤 배치 #{batch_num}: {success}개 성공, {fail}개 실패 "
+                f"(누적: {total_success}/{total_success + total_fail})"
+            )
             
             # 배치 간 딜레이
             await asyncio.sleep(delay_between_batches)
     
     logger.info(
-        f"📦 PhishTank 적재 완료: "
+        f"[Static] 📦 PhishTank 적재 완료: "
         f"성공 {total_success}, 실패 {total_fail}"
     )
     
@@ -227,7 +256,7 @@ class StaticWorker:
                 self.whitelist = await load_whitelist_csv(path)
                 return self.whitelist
         
-        logger.info("📋 화이트리스트 파일을 찾을 수 없습니다.")
+        logger.info("[Static] 📋 화이트리스트 파일을 찾을 수 없습니다.")
         return set()
     
     async def import_phishtank(self) -> tuple[int, int]:
@@ -246,7 +275,7 @@ class StaticWorker:
                     backend_url=self.backend_url
                 )
         
-        logger.warning("📋 PhishTank 파일을 찾을 수 없습니다.")
+        logger.warning("[Static] 📋 PhishTank 파일을 찾을 수 없습니다.")
         return 0, 0
     
     async def run_all(self) -> dict:

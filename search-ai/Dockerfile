@@ -1,38 +1,51 @@
 # =========================================
-# Search-AI Dockerfile
-# 지능형 도메인 홉 크롤러
+# Search-AI Dockerfile - Final Evolution v2
+# Playwright 클러스터 크롤러
 # =========================================
-# Multi-stage 빌드로 이미지 크기 최적화
+# Python 3.13 + Playwright 수동 설치
 
-# ---- Builder Stage ----
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+FROM python:3.13-slim-bookworm
 
 WORKDIR /app
+
+# 시스템 패키지 설치 (Playwright 의존성)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libatspi2.0-0 \
+    fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
+
+# uv 설치
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # 의존성 파일 복사
 COPY pyproject.toml ./
 
-# 의존성 설치 (가상환경 없이)
-RUN uv sync --no-dev --frozen 2>/dev/null || uv sync --no-dev
+# 의존성 설치
+RUN uv sync --no-dev
+
+# ★ Playwright 브라우저 설치 (Chromium만)
+RUN uv run playwright install chromium
 
 # 소스 코드 복사
 COPY . .
-
-# ---- Runtime Stage ----
-FROM python:3.12-slim-bookworm AS runtime
-
-WORKDIR /app
-
-# 필요한 시스템 패키지 설치
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# uv 복사
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-
-# 애플리케이션 파일 복사
-COPY --from=builder /app /app
 
 # 로그 디렉토리 생성
 RUN mkdir -p /app/logs
@@ -43,7 +56,9 @@ ENV PYTHONUNBUFFERED=1 \
     REACT_AI_URL=http://ai:8001 \
     BACKEND_URL=http://api:8000 \
     SEEDS_DIR=/app/seeds \
-    MAX_URLS=500
+    MAX_URLS=200 \
+    NUM_WORKERS=3 \
+    ENABLE_CERTSTREAM=true
 
-# 실행
+# ★ 클러스터 워커로 무한 실행
 CMD ["uv", "run", "python", "main.py"]
