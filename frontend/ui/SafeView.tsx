@@ -66,7 +66,7 @@ export function SafeView({ data, url }: SafeViewProps) {
             </Flex>
             <Flex justifyContent="space-between">
               <Text color="$black" fontWeight="700">
-                안전 점수:
+                위험 점수:
               </Text>
               <Text color="$safe" fontWeight="700">
                 {data.score}/100
@@ -85,6 +85,7 @@ export function SafeView({ data, url }: SafeViewProps) {
 
         <Flex
           w="100%"
+          maxW="600px"
           justifyContent="center"
           flexDir={["column", null, null, null, "row"]}
         >

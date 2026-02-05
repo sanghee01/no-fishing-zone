@@ -37,7 +37,7 @@ export function CautionView({ data, url }: CautionViewProps) {
           bg="$white"
           borderRadius="20px"
           boxShadow="0 3px 7px 0 rgba(0, 0, 0, 0.25)"
-          gap="40px"
+          gap={["20px", null, null, null, "40px"]}
           p={["24px", null, null, null, "40px"]}
           w="100%"
           maxW="640px"
@@ -55,7 +55,6 @@ export function CautionView({ data, url }: CautionViewProps) {
               </Box>
             }
           />
-          {/* TODO: 내용 서버 데이터로 바꿔야함 */}
           <VStack as="ol" gap="16px" pl="24px" m="0">
             <Text
               as="li"
@@ -86,6 +85,15 @@ export function CautionView({ data, url }: CautionViewProps) {
             >
               브라우저 주소창에 자물쇠 아이콘이 표시되지 않거나 인증서 오류가
               발생하는지 확인하시기 바랍니다.
+            </Text>
+            <Text
+              as="li"
+              color="$text"
+              fontSize="15px"
+              lineHeight="1.6"
+              wordBreak="keep-all"
+            >
+              상세 사유: {data.description}
             </Text>
           </VStack>
         </VStack>
@@ -163,6 +171,7 @@ export function CautionView({ data, url }: CautionViewProps) {
           flexWrap="wrap"
           justifyContent="center"
           w="100%"
+          maxW="640px"
           flexDir={["column", null, null, null, "row"]}
         >
           <BackToSafetyButton />

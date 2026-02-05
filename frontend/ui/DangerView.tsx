@@ -50,7 +50,6 @@ export function DangerView({ data }: DangerViewProps) {
               </Box>
             }
           />
-          {/* TODO: 내용 서버 데이터로 수정해야함 */}
           <VStack gap="16px">
             <Text
               color="$text"
@@ -72,10 +71,20 @@ export function DangerView({ data }: DangerViewProps) {
               해당 사이트 이용 시 법적 책임이 발생할 수 있으므로 더 이상의
               접근을 권장하지 않습니다.
             </Text>
+            <Text
+              color="$text"
+              fontSize={["14px", null, null, null, "16px"]}
+              fontWeight="400"
+              lineHeight="1.6"
+              wordBreak="keep-all"
+            >
+              상세 사유: {data.description}
+            </Text>
           </VStack>
         </VStack>
         <Flex
           w="100%"
+          maxW="640px"
           justifyContent="center"
           flexDir={["column", null, null, null, "row"]}
         >
