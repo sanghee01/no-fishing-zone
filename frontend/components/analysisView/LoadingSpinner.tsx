@@ -13,7 +13,11 @@ const trackColor = "#E2E8F0";
 
 export function LoadingSpinner() {
   return (
-    <Box pos="relative" boxSize={["240px", null, null, null, "300px"]}>
+    <Box
+      pos="relative"
+      boxSize={["240px", null, null, null, "300px"]}
+      mt={["60px", null, null, null, "0px"]}
+    >
       <Box
         as="svg"
         viewBox="0 0 100 100"

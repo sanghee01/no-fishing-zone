@@ -1,7 +1,7 @@
 "use client";
 
 import { Flex, Text } from "@devup-ui/react";
-import { Check, Circle, Loader2 } from "lucide-react";
+import { Check, Circle, LoaderCircle } from "lucide-react";
 import { css, keyframes } from "@devup-ui/react";
 
 const spin = keyframes({
@@ -16,12 +16,6 @@ export interface ChecklistItemProps {
   status: StepStatus;
 }
 
-/**
- * 체크리스트 아이템 컴포넌트
- * - completed: 체크 아이콘 (파란색)
- * - in_progress: 회전하는 로딩 아이콘
- * - pending: 빈 원 아이콘 (회색)
- */
 export function ChecklistItem({ label, status }: ChecklistItemProps) {
   const statusText = {
     pending: "대기",
@@ -40,10 +34,6 @@ export function ChecklistItem({ label, status }: ChecklistItemProps) {
     borderColor: status === "pending" ? "#CBD5E1" : "#003366",
   });
 
-  const spinnerStyle = css({
-    animation: `${spin} 1s linear infinite`,
-  });
-
   return (
     <Flex alignItems="center" justifyContent="space-between" w="100%" py="8px">
       <Flex alignItems="center" gap="14px">
@@ -52,11 +42,14 @@ export function ChecklistItem({ label, status }: ChecklistItemProps) {
             <Check size={14} color="white" strokeWidth={3} />
           )}
           {status === "in_progress" && (
-            <Loader2
-              size={16}
-              color="var(--primary)"
-              className={spinnerStyle}
-            />
+            <Flex
+              as="span"
+              animation={`${spin} 1s linear infinite`}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <LoaderCircle size={16} color="#003366" strokeWidth={3} />
+            </Flex>
           )}
           {status === "pending" && (
             <Circle size={6} color="#CBD5E1" fill="#CBD5E1" />
