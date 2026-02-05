@@ -1,16 +1,19 @@
 [project]
 name = "search-ai"
-version = "0.1.0"
-description = "Aegis Link 지능형 도메인 홉 크롤러 - 능동적 위협 수집 에이전트"
+version = "0.2.0"
+description = "Aegis Link 지능형 Playwright 클러스터 크롤러 - Final Evolution"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
-    "httpx[http2]>=0.28.0",      # 비동기 HTTP 클라이언트 (HTTP/2 지원)
-    "beautifulsoup4>=4.14.0",    # HTML 파싱
-    "tldextract>=5.3.0",         # Apex 도메인 추출
-    "fake-useragent>=2.0.0",     # User-Agent 로테이션
-    "aiofiles>=24.0.0",          # 비동기 파일 I/O
-    "python-dotenv>=1.0.0",      # 환경 변수 관리
+    "playwright==1.48.0",         # ★ 헤드리스 브라우저 (JS 렌더링) - 버전 고정!
+    "beautifulsoup4>=4.14.0",     # HTML 파싱 (백업용)
+    "tldextract>=5.3.0",          # Apex 도메인 추출
+    "fake-useragent>=2.0.0",      # User-Agent 로테이션
+    "aiofiles>=24.0.0",           # 비동기 파일 I/O
+    "python-dotenv>=1.0.0",       # 환경 변수 관리
+    "certstream>=1.12.0",         # SSL 인증서 실시간 감청
+    "httpx[http2]>=0.28.0",       # API 호출용 + HTTP/2 지원
+    "greenlet>=3.0.0",            # Playwright 의존성
 ]
 
 [project.scripts]

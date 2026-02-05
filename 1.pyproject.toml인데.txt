@@ -1,0 +1,157 @@
+1.pyproject.toml인데
+"[project]
+name = "search-ai"
+version = "0.1.0"
+description = "Aegis Link 지능형 도메인 홉 크롤러 - 능동적 위협 수집 에이전트"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx[http2]>=0.28.0",      # 비동기 HTTP 클라이언트 (HTTP/2 지원)
+    "beautifulsoup4>=4.14.0",    # HTML 파싱
+    "tldextract>=5.3.0",         # Apex 도메인 추출
+    "fake-useragent>=2.0.0",     # User-Agent 로테이션
+    "aiofiles>=24.0.0",          # 비동기 파일 I/O
+    "python-dotenv>=1.0.0",      # 환경 변수 관리
+]
+
+[project.scripts]
+search-ai = "main:main"
+"2026년 2월 3일 기준으로 파이썬 3.14.2최신판에 호환되게 버전들을 전부 업데이트 해줘.
+
+2. 화이트 리스트는 csv고 블랙 리스트는 json인데
+파일이 가동되는데 일관된 데이터 형식이 좋지 않을까?
+그런데 이걸 claude code로 변경하는게 좋을까(토큰 효율 측면에서)
+아니면 그대로csv, json따로 두는게 좋을까
+
+3. 지금은 엔트리 포인트가
+
+''인데
+
+셀프 크롤링(search-ai)의 엔트리 포인트를
+구글, 인스타, 디시인사이드등의
+'메인화면'에서 시작하는건
+
+너무 피싱 '외곽 안전지대'로부터 시작하는거 같은데 엔트리 포인트도 살짝 바꿔볼까 합니다.
+특정한 검색어 입력 링크에서 부터 시작한다던가
+
+지금 seeds/entry_points.txt의 내용은 너무 예시적이라 왜 현재 크롤링이 잘 작동하는지 모르겠어
+그리고 'keywords.txt'도 그렇고. ai가 해당 txt를 읽고 알아서 서치를 하는거야? txt로 제공하는 것 말고 코드에서 ai의 서치 성능을 더 높히는 방법이 없을까
+"# 1. 불법 포털 인덱스 (가장 확실한 소스)
+https://www.joosotok.com/
+https://www.jusocon.com/
+https://www.jusomoa.com/(심지어 이건 존재하지도 않은 링크임)
+https://www.linkmoa.com/(심지어 이건 존재하지도 않은 링크임)
+https://jusoping2.net/ (주소핑)
+
+# 2. 링크 트리 계열 (스캠/홍보용으로 다수 활용됨, SNS 대용)
+https://linktr.ee/ (특정 키워드 조합 필요, 예: linktr.ee/totosite 등)(여기서 시작하는건 너무 포괄적임)
+https://lit.link/
+https://allmy.link/
+
+# 3. 커뮤니티 게시판 (유동 인구가 많은 곳의 홍보 게시판)
+https://www.bobaedream.co.kr/board/bbs/list.php?code=freeb (자유게시판 내 스팸 링크)
+https://www.dcinside.com/ (특정 갤러리의 스팸성 게시글)"인데.
+
+내가 해당 txt를 수정한다면
+seeds/entry_points.txt의 내용을(그런데 질문할꼐, 이 seed/entry_point.txt 내용의 의미가 뭐야? ai가 해당 txt를 읽고 해당 링크 기준으로 찾는거야?
+
+"https://www.joosotok.com/
+https://www.jusocon.com/
+https://www.jusomoa.com/(심지어 이건 존재하지도 않은 링크임)
+https://www.linkmoa.com/(심지어 이건 존재하지도 않은 링크임)
+
+# 2. 링크 트리 계열 (스캠/홍보용으로 다수 활용됨, SNS 대용)
+https://linktr.ee/ (특정 키워드 조합 필요, 예: linktr.ee/totosite 등)
+https://lit.link/
+https://allmy.link/
+
+# 3. 커뮤니티 게시판 (유동 인구가 많은 곳의 홍보 게시판)
+https://www.bobaedream.co.kr/board/bbs/list.php?code=freeb (자유게시판 내 스팸 링크)
+https://www.dcinside.com/ (특정 갤러리의 스팸성 게시글, 그런데 이렇게 메인에서 시작하는 것은 너무 외곽지대에서 시작하는거 같아)
+https://gall.dcinside.com/board/lists/?id=lotto_new2 (디시 토토갤러리)
+https://gall.dcinside.com/board/lists?id=loan_new1(디시 대출갤러리)
+
+
+4. 그리고 이전의 문제를 해결해야해 "관찰: 크롤러가 linktr.ee나 App Store 링크를 타면서 microsoft.com, apple.com, google.com 같은 대형 IT 기업의 개인정보 처리방침(Privacy Policy) 페이지를 많이 긁고 있습니다. (이것들은 화이트리스트에 있더라도 링크 추출을 위해 방문하게 됩니다.)
+제언:
+현재 상태도 좋습니다. 해커톤 발표 시 "유명 플랫폼(Linktree 등)에 숨겨진 링크들을 추적하다 보니 대형 플랫폼의 네트워크망까지 분석하고 있다"고 설명할 수 있습니다.
+만약 좀 더 '불법 사이트'에 집중하고 싶다면, 나중에 keywords.txt에 privacy, terms, policy, help 같은 단어를 **제외 키워드(Exclude)**로 설정하여 대형 사이트의 고객센터 페이지로 빠지는 것을 방지할 수도 있습니다. (하지만 지금은 데이터가 잘 쌓이고 있으므로 그대로 두셔도 무방합니다.)" 이 문제 해결 어떻게 할 수 있을까.
+
+5. entry point.txt의 링크들을 제대로 반영해서 시작하고 있는거 같지 않아.
+터미널 내역을 보니까 몇몇 링크들에서 출발해서 개인정보 약관등을 긁어대고 있는거 같던데..
+
+6. "https://newtoki469.com/"이런 뉴토끼와 같은 사이트들은(웹 도메인 뒤에 숫자가 있는 불법 사이트 들은)
+한 곳이 막히면 새로 도메인의 뒤의 숫자만 바꿔서 업데이트 하는 경우가 많아 예를 들면
+'https://newtoki469.com/"이 막히면 "https://newtoki470.com/"으로 도메인의 숫자만 +1해서 바꾼다던가. 하는 식으로 불법 사이트 규제를 회피하는데 어떻게 해결할까?
+"https://torrentqq405.com/"과 같은경우는 "https://torrentqq406.com/"
+
+7. 불법 사이트들은 dns는 클라우드 플레어같은거로 붓 차단 하는 경우가 많아 -> 그런데 붓 차단은 상관 없나? 우린 불법 사이트 링크만 얻으면 되니까?
+
+8. 터미널의 작동 내용을 보면 entry 포인트가 몇 개인지 모르겠어. 그래서 어떤 엔트리 포인트에서 시작한 봇이 작동중인지 명시적으로 알 수 있게 어떻게 하면 좋을까?(이걸 잘 알아야 너가 나중에 claude code에게 프롬프트 내릴 때(이 1부터9번까지의 문제 논의한 것들을 전부 해결할 프롬프트를 제공해야하거든) 정확할거 같아)
+
+9. keyword.txt도 다시 정해야 할거 같아. 내가 개인적 서치를 해보니까
+"# Search-AI 키워드 필터 사전
+# 해당 키워드가 포함된 URL은 높은 우선순위로 수집됩니다
+
+# 도박 관련
+바카라
+바칼
+토토
+블랙잭
+룰렛
+베팅
+배팅
+로또
+먹튀
+충전
+환전
+급전
+라스 (이 단어가 무슨 의미인지는 모르겠는데 토토쟁이 커뮤니티에서 많이 언급됨 그런데 '라스베이거스'와 같은 연속된 키워드에 걸릴 수 있으니 다른 키워드들도(이렇게 해서 성능이 좋아질 키워드에 대상으로)''
+
+
+# 불법 스트리밍
+무료웹툰
+다시보기
+무료영화
+스트리밍
+티비다시보기
+토렌트
+
+# 피싱/스캠 일반
+최신주소
+입금보너스
+가입쿠폰
+무료쿠폰
+인증문자
+본인인증
+계정복구
+비밀번호찾기
+
+# 성인 콘텐츠
+야동
+성인
+19금
+av
+
+#성매매
+쩜오
+룸빵
+가씨
+키티
+
+
+# 약물/의약품
+비아그라
+시알리스
+발기부전
+처방전없이
+약국
+
+# 금융 사기
+대출
+신용대출
+급전
+당일입금
+개인돈"
+여기에서 정작 '입플'과 같은 현업자들만 아는 용어들이 더 정보가치가 높은거 같아. 이런 은어들은 어디서 더 찾아야 할까
+텔레그램 링크와 같은게 굉장히 불법인데..
