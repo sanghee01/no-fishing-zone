@@ -1,18 +1,12 @@
 import { createApi } from "@devup-api/fetch";
+import type { UrlReputationResponse, UrlReputationStatus } from "./types";
+
+export type { UrlReputationResponse, UrlReputationStatus };
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/";
 
 const api = createApi(baseURL);
-
-export type UrlReputationStatus = "SAFE" | "WARNING" | "BLOCK";
-
-export interface UrlReputationResponse {
-  url: string;
-  description: string | null;
-  score: number;
-  status: UrlReputationStatus;
-}
 
 /**
  * URL 평판 조회 API
