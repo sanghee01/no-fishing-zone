@@ -1,5 +1,3 @@
-"use client";
-
 import { Center, Flex, Image, Text, VStack } from "@devup-ui/react";
 import type { ReactNode } from "react";
 

@@ -7,7 +7,7 @@ import { CautionView } from "./CautionView";
 import { SafeView } from "./SafeView";
 import type { UrlReputationResponse } from "@/lib/api";
 
-interface AnalysisPageProps {
+interface AnalysisClientProps {
   url: string;
 }
 
@@ -20,11 +20,12 @@ interface AnalysisState {
 }
 
 /**
- * 분석 흐름 관리 (Analysis Flow)
- * - 분석 진행 상태 (AnalysisView) 및 결과 (Safe/Caution/Danger) 렌더링
- * - SSE 연결 및 상태 관리 담당
+ * SSE 전용 클라이언트 컴포넌트 (Analysis Client)
+ * - DB에 결과가 없을 때만 사용
+ * - SSE 연결 및 실시간 상태 관리 담당
+ * - 분석 완료 시 결과에 맞는 View 렌더링
  */
-export function AnalysisPage({ url }: AnalysisPageProps) {
+export function AnalysisClient({ url }: AnalysisClientProps) {
   const [state, setState] = useState<AnalysisState>({
     step1: "pending",
     step2: "pending",

@@ -3,7 +3,11 @@ import {
   PageLayoutContent,
   PageLayoutFooter,
 } from "@/ui/layout/PageLayout";
-import { AnalysisPage } from "@/ui/AnalysisPage";
+import { AnalysisClient } from "@/ui/AnalysisClient";
+import { DangerView } from "@/ui/DangerView";
+import { CautionView } from "@/ui/CautionView";
+import { SafeView } from "@/ui/SafeView";
+import { getUrlReputation } from "@/lib/api";
 
 export default async function HomePage({
   searchParams,
@@ -42,6 +46,21 @@ export default async function HomePage({
     );
   }
 
-  // URL이 있으면 분석 흐름(AnalysisPage) 시작
-  return <AnalysisPage url={targetUrl} />;
+  // 서버에서 DB 조회: 이미 분석된 결과가 있는지 확인
+  const existingResult = await getUrlReputation(targetUrl);
+
+  if (existingResult) {
+    // 결과가 있으면 SSR로 즉시 렌더링 (CSR 불필요)
+    switch (existingResult.status) {
+      case "BLOCK":
+        return <DangerView data={existingResult} />;
+      case "WARNING":
+        return <CautionView data={existingResult} url={targetUrl} />;
+      case "SAFE":
+        return <SafeView data={existingResult} url={targetUrl} />;
+    }
+  }
+
+  // 결과가 없으면 SSE 분석 시작 (CSR 필요)
+  return <AnalysisClient url={targetUrl} />;
 }

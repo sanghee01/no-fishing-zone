@@ -1,5 +1,3 @@
-"use client";
-
 import { Box, Flex, Text, VStack } from "@devup-ui/react";
 import { PageLayout } from "./layout/PageLayout";
 import type { UrlReputationResponse } from "@/lib/api";
