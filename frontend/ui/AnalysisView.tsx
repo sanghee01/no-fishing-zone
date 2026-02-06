@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlAnalysis } from "@/hooks/useUrlAnalysis";
 import { PageLayout } from "./layout/PageLayout";
 import { LoadingSpinner } from "@/components/analysisView/LoadingSpinner";
 import { ChecklistCard } from "@/components/analysisView/ChecklistCard";
@@ -8,16 +9,35 @@ import {
   type StepStatus,
 } from "@/components/analysisView/ChecklistItem";
 import { Title } from "@/components/common/Title";
+import { DangerView } from "./DangerView";
+import { CautionView } from "./CautionView";
+import { SafeView } from "./SafeView";
+import { ErrorView } from "@/components/common/ErrorView";
 
 export type { StepStatus };
 
 interface AnalysisViewProps {
-  step1: StepStatus;
-  step2: StepStatus;
-  step3: StepStatus;
+  url: string;
 }
 
-export function AnalysisView({ step1, step2, step3 }: AnalysisViewProps) {
+export function AnalysisView({ url }: AnalysisViewProps) {
+  const { step1, step2, step3, result, error, retry } = useUrlAnalysis(url);
+
+  if (error) {
+    return <ErrorView message={error} onRetry={retry} />;
+  }
+
+  if (result) {
+    switch (result.status) {
+      case "BLOCK":
+        return <DangerView data={result} />;
+      case "WARNING":
+        return <CautionView data={result} url={url} />;
+      case "SAFE":
+        return <SafeView data={result} url={url} />;
+    }
+  }
+
   return (
     <PageLayout>
       <PageLayout.Header>
