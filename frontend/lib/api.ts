@@ -3,8 +3,16 @@ import type { UrlReputationResponse, UrlReputationStatus } from "./types";
 
 export type { UrlReputationResponse, UrlReputationStatus };
 
-const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/";
+const getBaseURL = () => {
+  // 서버 사이드
+  if (typeof window === "undefined") {
+    return process.env.API_BASE_URL || "http://api:8000";
+  }
+  // 클라이언트 사이드
+  return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost/";
+};
+
+const baseURL = getBaseURL();
 
 const api = createApi(baseURL);
 
