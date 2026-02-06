@@ -5,6 +5,7 @@ import { AnalysisView, type StepStatus } from "./AnalysisView";
 import { DangerView } from "./DangerView";
 import { CautionView } from "./CautionView";
 import { SafeView } from "./SafeView";
+import { ErrorView } from "@/components/common/ErrorView";
 import type { UrlReputationResponse } from "@/lib/api";
 
 interface AnalysisClientProps {
@@ -121,13 +122,10 @@ export function AnalysisClient({ url }: AnalysisClientProps) {
   // 에러 상태
   if (state.error) {
     return (
-      <div className="page-container page-error">
-        <main className="main-content">
-          <h1>오류 발생</h1>
-          <p>{state.error}</p>
-          <button onClick={() => window.location.reload()}>다시 시도</button>
-        </main>
-      </div>
+      <ErrorView
+        message={state.error}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
