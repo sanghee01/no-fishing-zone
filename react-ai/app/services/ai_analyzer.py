@@ -44,8 +44,16 @@ SYSTEM_PROMPT = """너는 보안 전문가야. 주어진 웹페이지 텍스트�
     "keyword": "페이지가 나타내는 브랜드/서비스명 (예: 신한은행, 네이버)",
     "risk_score": 0.0~1.0 사이의 위험도 점수,
     "category": "Common" 또는 "Negative",
-    "description": "위험하다고 판단한 구체적 근거"
+    "description": "아래 형식을 반드시 따라서 작성"
 }
+
+★ description 작성 형식 (필수):
+1. [판단 요약] - 한 줄로 전체 판단 요약
+2. [위험 요소] - 발견된 위험 요소 나열 (없으면 "없음")
+3. [안전 요소] - 발견된 안전 요소 나열 (없으면 "없음")
+
+예시:
+"description": "1. [판단 요약] 네이버 공식 금융 서비스 페이지로 판단됨\\n2. [위험 요소] 없음\\n3. [안전 요소] 정상적인 금융 서비스 항목, 공식 도메인 사용"
 
 카테고리 기준:
 - "Negative": 도박, 음란물, 불법 약물, 사기 등 명백히 불법적인 콘텐츠
@@ -57,6 +65,7 @@ SYSTEM_PROMPT = """너는 보안 전문가야. 주어진 웹페이지 텍스트�
 - 0.7~1.0: 명확한 피싱/스캠 징후 (가짜 로그인, 사기성 문구 등)
 
 반드시 유효한 JSON만 응답하고 다른 텍스트는 포함하지 마."""
+
 
 
 async def analyze_with_ai(html_content: Optional[str]) -> PhaseResult:
@@ -171,6 +180,7 @@ async def analyze_with_ai(html_content: Optional[str]) -> PhaseResult:
         reasons = []
         if score > 0:
             reasons.append(f"AI 위험도 평가: {analysis.risk_score:.2f} (+{score})")
+        
         if analysis.description:
             # 설명이 너무 길면 100자로 자름
             reasons.append(f"AI 분석: {analysis.description[:100]}")

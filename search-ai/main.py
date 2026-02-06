@@ -39,15 +39,15 @@ load_dotenv()
 WORKER_REST_INTERVAL = 30
 
 
-def load_seeds(seeds_dir: Path, hopper: DomainHopper) -> tuple[int, list[str]]:
+def load_seeds(seeds_dir: Path) -> tuple[list[str], list[str]]:
     """
-    시드 파일을 로드하고 공유 큐에 추가합니다.
+    시드 파일을 로드합니다.
     
     Returns:
-        (엔트리 개수, 키워드 목록) 튜플
+        (엔트리 URL 목록, 키워드 목록) 튜플
     """
     logger = get_logger()
-    count = 0
+    entries = []
     keywords = []
     
     # 엔트리 포인트 로드
@@ -60,9 +60,9 @@ def load_seeds(seeds_dir: Path, hopper: DomainHopper) -> tuple[int, list[str]]:
                     if "(" in line:
                         line = line.split("(")[0].strip()
                     url = normalize_url(line)
-                    if url and hopper.add_url(url, priority=0):
-                        count += 1
-        logger.info(f"[Main] 📍 엔트리 포인트: {count}개")
+                    if url:
+                        entries.append(url)
+        logger.info(f"[Main] 📍 엔트리 포인트: {len(entries)}개")
     
     # 키워드 로드
     keywords_file = seeds_dir / "keywords.txt"
@@ -74,7 +74,7 @@ def load_seeds(seeds_dir: Path, hopper: DomainHopper) -> tuple[int, list[str]]:
                     keywords.append(line)
         logger.info(f"[Main] 🔑 키워드: {len(keywords)}개")
     
-    return count, keywords
+    return entries, keywords
 
 
 async def run_static_import(seeds_dir: Path, backend_url: str) -> set[str]:
@@ -97,7 +97,7 @@ async def run_static_import(seeds_dir: Path, backend_url: str) -> set[str]:
 
 async def run_worker(
     worker_id: int,
-    shared_hopper: DomainHopper,
+    entry_url: str,
     playwright,
     react_ai_url: str,
     backend_url: str,
@@ -106,20 +106,26 @@ async def run_worker(
     max_urls_per_cycle: int
 ) -> None:
     """
-    단일 워커 무한 루프
+    단일 워커 무한 루프 (전용 엔트리 포인트)
     
     Args:
-        worker_id: 워커 ID (1, 2, 3)
-        shared_hopper: 공유 URL 큐
+        worker_id: 워커 ID (1~6)
+        entry_url: 이 워커 전용 시작 URL
         playwright: Playwright 인스턴스
         ...
     """
     logger = get_logger()
     cycle = 0
     
+    # ★ 각 워커가 자신만의 DomainHopper를 가짐
+    dedicated_hopper = DomainHopper()
+    dedicated_hopper.add_url(entry_url, priority=0)
+    
+    logger.info(f"[Worker-{worker_id}] 🎯 전용 엔트리: {entry_url}")
+    
     engine = PlaywrightEngine(
         worker_id=worker_id,
-        shared_hopper=shared_hopper,
+        shared_hopper=dedicated_hopper,
         react_ai_url=react_ai_url,
         backend_url=backend_url,
         keywords=keywords,
@@ -141,6 +147,11 @@ async def run_worker(
                 f"처리 {stats.get('crawled', 0)}개, "
                 f"차단 {stats.get('blocked', 0)}개"
             )
+            
+            # ★ 큐가 비면 다시 엔트리 포인트를 추가
+            if dedicated_hopper.queue_size == 0:
+                logger.info(f"[Worker-{worker_id}] 🔄 큐 비어있음, 엔트리 포인트 재주입")
+                dedicated_hopper.add_url(entry_url, priority=0)
         
         except Exception as e:
             logger.error(f"[Worker-{worker_id}] ❌ 오류: {e}")
@@ -207,14 +218,14 @@ async def main():
     """
     메인 함수 - Playwright 클러스터 시스템
     
-    ★ 3개 워커 + CertStream 병렬 실행 ★
+    ★ 엔트리 포인트 1:1 워커 매핑 ★
     ★ 컨테이너 절대 종료 안 함 ★
     """
     logger = setup_logging()
     
     logger.info("🛡️" + "=" * 48)
     logger.info("🛡️ Search-AI Final Evolution - Playwright Cluster")
-    logger.info("🛡️ 3 Workers + CertStream 병렬 실행")
+    logger.info("🛡️ 1:1 Entry Point Worker Mapping")
     logger.info("🛡️ Aegis Link Project")
     logger.info("🛡️" + "=" * 48)
     
@@ -223,32 +234,34 @@ async def main():
     react_ai_url = os.getenv("REACT_AI_URL", "http://ai:8001")
     backend_url = os.getenv("BACKEND_URL", "http://api:8000")
     max_urls = int(os.getenv("MAX_URLS", "200"))
-    num_workers = int(os.getenv("NUM_WORKERS", "3"))
     skip_static = os.getenv("SKIP_STATIC_IMPORT", "").lower() == "true"
     enable_certstream = os.getenv("ENABLE_CERTSTREAM", "true").lower() == "true"
-    
-    logger.info(f"[Config] 🕷️ Workers: {num_workers}")
-    logger.info(f"[Config] 🔢 Max URLs/Cycle: {max_urls}")
-    logger.info(f"[Config] 🎧 CertStream: {'ON' if enable_certstream else 'OFF'}")
     
     # 1. 정적 데이터 적재
     whitelist: set[str] = set()
     if not skip_static:
         whitelist = await run_static_import(seeds_dir, backend_url)
     
-    # 2. 공유 큐 생성 및 시드 로드
-    shared_hopper = DomainHopper()
-    entry_count, keywords = load_seeds(seeds_dir, shared_hopper)
-    logger.info(f"[Main] 📊 공유 큐 초기화: {shared_hopper.queue_size}개 URL")
+    # 2. 시드 로드 (엔트리 URL 목록 반환)
+    entry_urls, keywords = load_seeds(seeds_dir)
+    num_workers = len(entry_urls)
+    
+    logger.info(f"[Config] 🕷️ Workers: {num_workers} (엔트리 포인트 수 기준)")
+    logger.info(f"[Config] 🔢 Max URLs/Cycle: {max_urls}")
+    logger.info(f"[Config] 🎧 CertStream: {'ON' if enable_certstream else 'OFF'}")
+    
+    if num_workers == 0:
+        logger.error("[Main] ❌ 엔트리 포인트가 없습니다! entry_points.txt를 확인하세요.")
+        return
     
     # 3. Playwright 시작
     async with async_playwright() as playwright:
         
-        # 워커 태스크 생성
+        # ★ 워커 태스크 생성: 각 엔트리 포인트에 전용 워커 1개씩
         worker_tasks = [
             run_worker(
                 worker_id=i + 1,
-                shared_hopper=shared_hopper,
+                entry_url=entry_urls[i],
                 playwright=playwright,
                 react_ai_url=react_ai_url,
                 backend_url=backend_url,
@@ -266,7 +279,7 @@ async def main():
                 run_certstream_daemon(seeds_dir, react_ai_url, backend_url)
             )
         
-        logger.info(f"[Main] 🚀 클러스터 시작: {len(worker_tasks)} Workers + CertStream")
+        logger.info(f"[Main] 🚀 클러스터 시작: {num_workers} Workers (1:1 매핑) + CertStream")
         
         # 모든 태스크 병렬 실행 (무한)
         await asyncio.gather(*all_tasks, return_exceptions=True)
