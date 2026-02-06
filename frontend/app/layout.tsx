@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import React from "react";
-import "./globals.css";
 import { ThemeScript } from "@devup-ui/react";
+import "@/app/globalCss";
 
 export const metadata: Metadata = {
   title: "낚시금지구역",

@@ -1,17 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnalysisView, type StepStatus } from "./AnalysisView";
-import { DangerView } from "./DangerView";
-import { CautionView } from "./CautionView";
-import { SafeView } from "./SafeView";
+import { useCallback, useEffect, useState } from "react";
 import type { UrlReputationResponse } from "@/lib/api";
 
-interface AnalysisClientProps {
-  url: string;
-}
+export type StepStatus = "pending" | "in_progress" | "completed";
 
-interface AnalysisState {
+export interface AnalysisState {
   step1: StepStatus;
   step2: StepStatus;
   step3: StepStatus;
@@ -19,13 +13,17 @@ interface AnalysisState {
   error: string | null;
 }
 
+interface UseUrlAnalysisResult extends AnalysisState {
+  retry: () => void;
+}
+
 /**
- * SSE 전용 클라이언트 컴포넌트 (Analysis Client)
- * - DB에 결과가 없을 때만 사용
- * - SSE 연결 및 실시간 상태 관리 담당
- * - 분석 완료 시 결과에 맞는 View 렌더링
+ * URL 분석 SSE 연결을 관리하는 커스텀 훅
+ * - EventSource를 통해 서버와 SSE 연결
+ * - 진행 상태(step1, step2, step3) 및 최종 결과 관리
  */
-export function AnalysisClient({ url }: AnalysisClientProps) {
+export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
+  const [retryCount, setRetryCount] = useState(0);
   const [state, setState] = useState<AnalysisState>({
     step1: "pending",
     step2: "pending",
@@ -34,8 +32,18 @@ export function AnalysisClient({ url }: AnalysisClientProps) {
     error: null,
   });
 
+  const retry = useCallback(() => {
+    setState({
+      step1: "pending",
+      step2: "pending",
+      step3: "pending",
+      result: null,
+      error: null,
+    });
+    setRetryCount((prev) => prev + 1);
+  }, []);
+
   useEffect(() => {
-    // SSE 연결
     const apiBaseUrl =
       process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
     const eventSource = new EventSource(
@@ -112,38 +120,13 @@ export function AnalysisClient({ url }: AnalysisClientProps) {
       eventSource.close();
     };
 
-    // 클린업
     return () => {
       eventSource.close();
     };
-  }, [url]);
+  }, [url, retryCount]);
 
-  // 에러 상태
-  if (state.error) {
-    return (
-      <div className="page-container page-error">
-        <main className="main-content">
-          <h1>오류 발생</h1>
-          <p>{state.error}</p>
-          <button onClick={() => window.location.reload()}>다시 시도</button>
-        </main>
-      </div>
-    );
-  }
-
-  // 결과가 있으면 결과 페이지 표시
-  if (state.result) {
-    switch (state.result.status) {
-      case "BLOCK":
-        return <DangerView data={state.result} />;
-      case "WARNING":
-        return <CautionView data={state.result} url={url} />;
-      case "SAFE":
-        return <SafeView data={state.result} url={url} />;
-    }
-  }
-
-  return (
-    <AnalysisView step1={state.step1} step2={state.step2} step3={state.step3} />
-  );
+  return {
+    ...state,
+    retry,
+  };
 }
