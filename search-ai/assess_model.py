@@ -2,7 +2,9 @@
 ===========================================
 📄 assess_model.py - 모델 성능 평가 스크립트
 ===========================================
-PhishTank + Tranco 데이터셋을 사용해 react-ai의 탐지 정확도를 측정합니다.
+OpenPhish + Tranco 데이터셋을 사용해 react-ai의 탐지 정확도를 측정합니다.
+
+★ PhishTank 대신 OpenPhish 사용 (더 실시간, Dead URL 적음)
 
 사용법:
     uv run python assess_model.py --limit 150
@@ -27,35 +29,41 @@ import os
 REACT_AI_URL = os.getenv("REACT_AI_URL", "http://ai:8001")  # Docker: ai, 로컬: localhost
 
 
-def load_phishtank_samples(seeds_dir: Path, limit: int = 100) -> list[str]:
+def load_openphish_samples(seeds_dir: Path, limit: int = 100) -> list[str]:
     """
-    PhishTank JSON에서 피싱 URL 샘플을 가져옵니다.
+    OpenPhish TXT에서 피싱 URL 샘플을 가져옵니다.
     
-    PhishTank 형식:
-    [{"phish_id": ..., "url": "http://...", ...}, ...]
+    OpenPhish 형식: 줄 단위 URL 목록
+    https://example.com/phishing1
+    https://example.com/phishing2
+    ...
+    
+    ★ PhishTank보다 Dead URL이 적고, 12시간마다 갱신됨
     """
-    json_file = seeds_dir / "pished_tank.json"
+    txt_file = seeds_dir / "openphish.txt"
     
-    if not json_file.exists():
-        print(f"⚠️ 파일 없음: {json_file}")
+    if not txt_file.exists():
+        print(f"⚠️ 파일 없음: {txt_file}")
+        print(f"💡 'uv run python update_openphish.py'로 먼저 다운로드하세요.")
         return []
     
-    print(f"[PhishTank] 악성 URL {limit}개 로드 중...")
+    print(f"[OpenPhish] 악성 URL {limit}개 로드 중...")
     
     try:
-        with open(json_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        
-        # URL 추출
-        all_urls = [entry.get("url") for entry in data if entry.get("url")]
+        with open(txt_file, "r", encoding="utf-8") as f:
+            all_urls = [
+                line.strip() 
+                for line in f 
+                if line.strip() and line.strip().startswith("http")
+            ]
         
         # 랜덤 샘플링
         samples = random.sample(all_urls, min(limit, len(all_urls)))
-        print(f"[PhishTank] ✅ {len(samples)}개 URL 샘플링 (전체: {len(all_urls)}개)")
+        print(f"[OpenPhish] ✅ {len(samples)}개 URL 샘플링 (전체: {len(all_urls)}개)")
         return samples
         
     except Exception as e:
-        print(f"[PhishTank] ❌ 로드 실패: {e}")
+        print(f"[OpenPhish] ❌ 로드 실패: {e}")
         return []
 
 
@@ -229,7 +237,7 @@ async def main():
     seeds_dir = Path(args.seeds_dir)
     
     # 테스트 데이터 로드
-    malicious_urls = load_phishtank_samples(seeds_dir, args.limit)
+    malicious_urls = load_openphish_samples(seeds_dir, args.limit)
     benign_urls = load_tranco_samples(seeds_dir, args.limit)
     
     if not malicious_urls:

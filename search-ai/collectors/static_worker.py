@@ -1,19 +1,20 @@
 """
 ===========================================
-📄 static_worker.py - 정적 데이터 수집기 Ver.3.1
+📄 static_worker.py - 정적 데이터 수집기 Ver.4
 ===========================================
-PhishTank, Tranco 등 정적 데이터를 파싱하여 DB에 적재합니다.
+OpenPhish, Tranco 등 정적 데이터를 파싱하여 DB에 적재합니다.
 
-Ver.3.1 수정:
+Ver.4 변경사항:
+- PhishTank (Dead URL 다수) → OpenPhish (실시간, 12h 갱신)
+- Docker 시작 시 자동 OpenPhish 다운로드
 - URL 길이 검증 (2048자 초과 시 스킵)
-- 배치 카운터 수정
-- 상세 로깅 추가
 """
 
 import asyncio
-import json
 from pathlib import Path
 from typing import AsyncGenerator
+
+import httpx
 
 from api_client.backend_client import BackendClient
 from utils.url_normalizer import normalize_url
@@ -24,60 +25,100 @@ logger = get_logger()
 # URL 최대 길이 (PostgreSQL VARCHAR 및 브라우저 한계 고려)
 MAX_URL_LENGTH = 2048
 
+# OpenPhish 공개 피드 URL (12시간마다 갱신됨)
+OPENPHISH_FEED_URL = "https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt"
 
-async def load_phishtank_data(
-    file_path: Path,
-    batch_size: int = 1000
-) -> AsyncGenerator[list[dict], None]:
+
+async def fetch_openphish_feed() -> list[str]:
     """
-    PhishTank JSON 파일을 배치 단위로 로드합니다.
+    OpenPhish GitHub 피드에서 URL 목록을 다운로드합니다.
     
-    메모리 효율을 위해 제너레이터 방식으로 구현했습니다.
+    Returns:
+        피싱 URL 목록
+    """
+    logger.info(f"[Static] 🌐 OpenPhish 피드 다운로드 중...")
+    
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            response = await client.get(OPENPHISH_FEED_URL)
+            response.raise_for_status()
+            
+            urls = [
+                line.strip() 
+                for line in response.text.splitlines() 
+                if line.strip() and line.strip().startswith("http")
+            ]
+            
+            logger.info(f"[Static] ✅ OpenPhish: {len(urls)}개 URL 다운로드 완료")
+            return urls
+            
+        except Exception as e:
+            logger.error(f"[Static] ❌ OpenPhish 다운로드 실패: {e}")
+            return []
+
+
+async def save_openphish_to_file(urls: list[str], output_path: Path) -> bool:
+    """
+    OpenPhish URL 목록을 파일에 저장합니다 (덮어쓰기).
     
     Args:
-        file_path: PhishTank JSON 파일 경로
+        urls: 저장할 URL 목록
+        output_path: 저장 경로
+        
+    Returns:
+        성공 여부
+    """
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, "w", encoding="utf-8") as f:
+            for url in urls:
+                f.write(url + "\n")
+        
+        logger.info(f"[Static] 💾 OpenPhish 저장 완료: {output_path}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"[Static] ❌ OpenPhish 저장 실패: {e}")
+        return False
+
+
+async def load_openphish_data(
+    file_path: Path,
+    batch_size: int = 500
+) -> AsyncGenerator[list[dict], None]:
+    """
+    OpenPhish TXT 파일을 배치 단위로 로드합니다.
+    
+    Args:
+        file_path: OpenPhish TXT 파일 경로
         batch_size: 배치 크기
         
     Yields:
         URL 평판 정보 딕셔너리 목록
     """
     if not file_path.exists():
-        logger.warning(f"[Static] ⚠️ PhishTank 파일 없음: {file_path}")
+        logger.warning(f"[Static] ⚠️ OpenPhish 파일 없음: {file_path}")
         return
     
-    logger.info(f"[Static] 📂 PhishTank 데이터 로드 중: {file_path}")
+    logger.info(f"[Static] 📂 OpenPhish 데이터 로드 중: {file_path}")
     
     skipped_count = 0
     processed_count = 0
     
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            lines = f.readlines()
         
-        # PhishTank 형식: 리스트 또는 딕셔너리
-        if isinstance(data, dict):
-            # {"data": [...]} 형식일 수 있음
-            items = data.get("data", data.get("phishes", []))
-        elif isinstance(data, list):
-            items = data
-        else:
-            logger.error("[Static] ❌ PhishTank 데이터 형식 오류")
-            return
-        
-        total_items = len(items)
-        logger.info(f"[Static] 📊 PhishTank 항목 수: {total_items}")
+        total_items = len(lines)
+        logger.info(f"[Static] 📊 OpenPhish 항목 수: {total_items}")
         
         batch: list[dict] = []
         
-        for item in items:
-            # PhishTank 형식에 맞게 URL 추출
-            url = None
-            if isinstance(item, dict):
-                url = item.get("url") or item.get("phish_url") or item.get("target")
-            elif isinstance(item, str):
-                url = item
+        for line in lines:
+            url = line.strip()
             
-            if not url:
+            if not url or not url.startswith("http"):
                 skipped_count += 1
                 continue
             
@@ -87,10 +128,10 @@ async def load_phishtank_data(
                 skipped_count += 1
                 continue
             
-            # ★ URL 길이 검증 (2048자 초과 시 스킵)
+            # URL 길이 검증 (2048자 초과 시 스킵)
             if len(normalized) > MAX_URL_LENGTH:
                 skipped_count += 1
-                logger.debug(f"[Static] ⏭️ URL 너무 김 ({len(normalized)}자): {normalized[:50]}...")
+                logger.debug(f"[Static] ⏭️ URL 너무 김 ({len(normalized)}자)")
                 continue
             
             processed_count += 1
@@ -98,7 +139,7 @@ async def load_phishtank_data(
                 "url": normalized,
                 "score": 100,  # 피싱 사이트는 최고 위험도
                 "status": "BLOCK",
-                "description": "PhishTank 블랙리스트"
+                "description": "OpenPhish 블랙리스트"
             })
             
             if len(batch) >= batch_size:
@@ -111,10 +152,8 @@ async def load_phishtank_data(
         
         logger.info(f"[Static] 📊 처리: {processed_count}개, 스킵: {skipped_count}개")
             
-    except json.JSONDecodeError as e:
-        logger.error(f"[Static] ❌ PhishTank JSON 파싱 오류: {e}")
     except Exception as e:
-        logger.error(f"[Static] ❌ PhishTank 로드 오류: {e}")
+        logger.error(f"[Static] ❌ OpenPhish 로드 오류: {e}")
 
 
 async def load_whitelist_csv(
@@ -167,17 +206,17 @@ async def load_whitelist_csv(
     return domains
 
 
-async def import_phishtank_to_db(
-    phishtank_path: Path,
+async def import_openphish_to_db(
+    openphish_path: Path,
     backend_url: str = "http://api:8000",
-    batch_size: int = 1000,
+    batch_size: int = 500,
     delay_between_batches: float = 0.1
 ) -> tuple[int, int]:
     """
-    PhishTank 데이터를 Rust 백엔드 DB에 적재합니다.
+    OpenPhish 데이터를 Rust 백엔드 DB에 적재합니다.
     
     Args:
-        phishtank_path: PhishTank JSON 파일 경로
+        openphish_path: OpenPhish TXT 파일 경로
         backend_url: 백엔드 서버 URL
         batch_size: 배치 크기
         delay_between_batches: 배치 간 딜레이 (초)
@@ -190,16 +229,15 @@ async def import_phishtank_to_db(
     batch_num = 0
     
     async with BackendClient(base_url=backend_url) as client:
-        async for batch in load_phishtank_data(phishtank_path, batch_size):
+        async for batch in load_openphish_data(openphish_path, batch_size):
             batch_num += 1
             
             success, fail = await client.batch_upsert(
                 items=batch,
                 batch_size=batch_size,
-                delay_between_batches=0.05  # 배치 내부 딜레이
+                delay_between_batches=0.05
             )
             
-            # ★ 누적 카운터 올바르게 갱신
             total_success += success
             total_fail += fail
             
@@ -208,11 +246,10 @@ async def import_phishtank_to_db(
                 f"(누적: {total_success}/{total_success + total_fail})"
             )
             
-            # 배치 간 딜레이
             await asyncio.sleep(delay_between_batches)
     
     logger.info(
-        f"[Static] 📦 PhishTank 적재 완료: "
+        f"[Static] 📦 OpenPhish 적재 완료: "
         f"성공 {total_success}, 실패 {total_fail}"
     )
     
@@ -223,7 +260,9 @@ class StaticWorker:
     """
     정적 데이터 수집 워커
     
-    PhishTank, Tranco 등 정적 데이터 소스를 관리하고 DB에 적재합니다.
+    OpenPhish, Tranco 등 정적 데이터 소스를 관리하고 DB에 적재합니다.
+    
+    ★ Ver.4: PhishTank → OpenPhish로 변경
     """
     
     def __init__(
@@ -242,6 +281,24 @@ class StaticWorker:
         self.backend_url = backend_url
         self.whitelist: set[str] = set()
     
+    async def update_openphish(self) -> bool:
+        """
+        OpenPhish 피드를 다운로드하고 저장합니다.
+        
+        ★ Docker 시작 시 자동 호출됨
+        
+        Returns:
+            성공 여부
+        """
+        urls = await fetch_openphish_feed()
+        
+        if not urls:
+            logger.warning("[Static] ⚠️ OpenPhish 피드가 비어있습니다.")
+            return False
+        
+        output_path = self.seeds_dir / "openphish.txt"
+        return await save_openphish_to_file(urls, output_path)
+    
     async def load_whitelist(self) -> set[str]:
         """
         화이트리스트를 로드합니다.
@@ -249,7 +306,6 @@ class StaticWorker:
         Returns:
             화이트리스트 도메인 집합
         """
-        # 1000000white.csv 또는 다른 이름 시도
         for filename in ["1000000white.csv", "whitelist.csv", "tranco.csv"]:
             path = self.seeds_dir / filename
             if path.exists():
@@ -259,45 +315,61 @@ class StaticWorker:
         logger.info("[Static] 📋 화이트리스트 파일을 찾을 수 없습니다.")
         return set()
     
-    async def import_phishtank(self) -> tuple[int, int]:
+    async def import_openphish(self) -> tuple[int, int]:
         """
-        PhishTank 데이터를 DB에 적재합니다.
+        OpenPhish 데이터를 DB에 적재합니다.
         
         Returns:
             (성공 개수, 실패 개수) 튜플
         """
-        # pished_tank.json 또는 phishtank.json 시도
-        for filename in ["pished_tank.json", "phishtank.json"]:
-            path = self.seeds_dir / filename
-            if path.exists():
-                return await import_phishtank_to_db(
-                    phishtank_path=path,
-                    backend_url=self.backend_url
-                )
+        path = self.seeds_dir / "openphish.txt"
         
-        logger.warning("[Static] 📋 PhishTank 파일을 찾을 수 없습니다.")
+        if path.exists():
+            return await import_openphish_to_db(
+                openphish_path=path,
+                backend_url=self.backend_url
+            )
+        
+        logger.warning("[Static] 📋 OpenPhish 파일을 찾을 수 없습니다. 다운로드 시도...")
+        
+        # 파일이 없으면 다운로드 후 적재
+        if await self.update_openphish():
+            return await import_openphish_to_db(
+                openphish_path=path,
+                backend_url=self.backend_url
+            )
+        
         return 0, 0
     
     async def run_all(self) -> dict:
         """
         모든 정적 데이터 작업을 실행합니다.
         
+        ★ Docker 시작 시 호출됨:
+        1. OpenPhish 최신 피드 다운로드
+        2. 화이트리스트 로드
+        3. OpenPhish 블랙리스트 DB 적재
+        
         Returns:
             작업 결과 통계
         """
         results = {
             "whitelist_count": 0,
-            "phishtank_success": 0,
-            "phishtank_fail": 0
+            "openphish_success": 0,
+            "openphish_fail": 0,
+            "openphish_updated": False
         }
         
-        # 화이트리스트 로드
+        # ★ Step 1: OpenPhish 최신 피드 다운로드 (항상 실행)
+        results["openphish_updated"] = await self.update_openphish()
+        
+        # Step 2: 화이트리스트 로드
         whitelist = await self.load_whitelist()
         results["whitelist_count"] = len(whitelist)
         
-        # PhishTank 적재
-        success, fail = await self.import_phishtank()
-        results["phishtank_success"] = success
-        results["phishtank_fail"] = fail
+        # Step 3: OpenPhish 블랙리스트 DB 적재
+        success, fail = await self.import_openphish()
+        results["openphish_success"] = success
+        results["openphish_fail"] = fail
         
         return results
