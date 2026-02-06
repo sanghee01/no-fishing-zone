@@ -13,4 +13,3 @@ https://www.linkmoa.com/
 # 2. DC인사이드 타겟 갤러리 (도박/대출/주식 관련 스팸 집중)
 https://gall.dcinside.com/board/lists/?id=lotto_new2
 https://gall.dcinside.com/board/lists?id=loan_new1
-https://gall.dcinside.com/board/lists?id=stock_new2

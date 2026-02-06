@@ -38,8 +38,8 @@ def normalize_url(url: str) -> str:
     # URL 파싱
     parsed = urlparse(url.strip())
     
-    # 스킴이 없으면 https 추가
-    scheme = "https"
+    # ★ 원본 스킴 유지 (http/https), 없으면 https 기본값
+    scheme = parsed.scheme.lower() if parsed.scheme in ("http", "https") else "https"
     
     # 호스트 정규화 (소문자, www. 제거)
     netloc = parsed.netloc.lower()
