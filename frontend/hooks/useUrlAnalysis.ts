@@ -45,7 +45,9 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
 
   useEffect(() => {
     const apiBaseUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      (typeof window !== "undefined" ? window.location.origin : "");
+
     const eventSource = new EventSource(
       `${apiBaseUrl}/url-reputations/analyze-stream?url=${encodeURIComponent(url)}`,
     );
@@ -59,35 +61,21 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
           setState((prev) => {
             const newState = { ...prev };
 
-            // 해당 단계까지 완료 처리
-            if (data.step >= 1) {
-              newState.step1 =
-                data.step === 1 && data.status === "in_progress"
-                  ? "in_progress"
-                  : "completed";
-            }
-            if (data.step >= 2) {
-              newState.step2 =
-                data.step === 2 && data.status === "in_progress"
-                  ? "in_progress"
-                  : data.step > 2
-                    ? "completed"
-                    : prev.step2;
-            }
-            if (data.step >= 3) {
-              newState.step3 =
-                data.step === 3 && data.status === "in_progress"
-                  ? "in_progress"
-                  : data.step > 3
-                    ? "completed"
-                    : prev.step3;
-            }
-
-            // 현재 단계를 in_progress로 설정
-            if (data.status === "in_progress") {
-              if (data.step === 1) newState.step1 = "in_progress";
-              if (data.step === 2) newState.step2 = "in_progress";
-              if (data.step === 3) newState.step3 = "in_progress";
+            if (data.step === 1) {
+              newState.step1 = data.status as StepStatus;
+            } else if (data.step === 2) {
+              if (prev.step1 === "in_progress") {
+                newState.step1 = "completed";
+              }
+              newState.step2 = data.status as StepStatus;
+            } else if (data.step === 3) {
+              if (prev.step1 === "in_progress") {
+                newState.step1 = "completed";
+              }
+              if (prev.step2 === "in_progress") {
+                newState.step2 = "completed";
+              }
+              newState.step3 = data.status as StepStatus;
             }
 
             // 결과가 있으면 저장

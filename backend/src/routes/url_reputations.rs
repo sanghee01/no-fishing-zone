@@ -4,7 +4,7 @@ use axum::{
     response::sse::{Event, Sse},
     Json,
 };
-use futures::stream::{self, Stream};
+use futures::stream;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
@@ -162,7 +162,7 @@ struct ProgressEvent {
 pub async fn analyze_stream(
     State(db): State<DatabaseConnection>,
     Query(query): Query<GetUrlQuery>,
-) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+) -> impl axum::response::IntoResponse {
     let url = query.url.clone();
     
     let stream = stream::unfold(
@@ -170,6 +170,15 @@ pub async fn analyze_stream(
         |state| async move {
             match state {
                 AnalyzeState::Start { db, url } => {
+                    // Cloudflare 버퍼링 방지를 위한 초기 패딩 (110KB - Quick Tunnel 강제 Flush용)
+                    // Quick Tunnel은 대시보드 설정이 불가능하므로 무식하게 버퍼를 채워야 함
+                    let padding = " ".repeat(1024 * 110);
+                    Some((
+                        Ok::<_, Infallible>(Event::default().comment(padding)),
+                        AnalyzeState::Step1 { db, url },
+                    ))
+                }
+                AnalyzeState::Step1 { db, url } => {
                     // Step 1: DB 조회 시작
                     let event = ProgressEvent {
                         step: 1,
@@ -177,8 +186,10 @@ pub async fn analyze_stream(
                         result: None,
                         done: false,
                     };
+                    // 플러시 보장을 위한 딜레이
+                    tokio::time::sleep(Duration::from_millis(50)).await;
                     Some((
-                        Ok(Event::default().json_data(&event).unwrap()),
+                        Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                         AnalyzeState::CheckDb { db, url },
                     ))
                 }
@@ -206,7 +217,7 @@ pub async fn analyze_stream(
                             done: true,
                         };
                         Some((
-                            Ok(Event::default().json_data(&event).unwrap()),
+                            Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                             AnalyzeState::Done,
                         ))
                     } else {
@@ -217,8 +228,10 @@ pub async fn analyze_stream(
                             result: None,
                             done: false,
                         };
+                        // 플러시 보장을 위한 딜레이
+                        tokio::time::sleep(Duration::from_millis(50)).await;
                         Some((
-                            Ok(Event::default().json_data(&event).unwrap()),
+                            Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                             AnalyzeState::StartAi { db, url },
                         ))
                     }
@@ -231,8 +244,10 @@ pub async fn analyze_stream(
                         result: None,
                         done: false,
                     };
+                    // 플러시 보장을 위한 딜레이
+                    tokio::time::sleep(Duration::from_millis(50)).await;
                     Some((
-                        Ok(Event::default().json_data(&event).unwrap()),
+                        Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                         AnalyzeState::CallAi { db, url },
                     ))
                 }
@@ -279,8 +294,10 @@ pub async fn analyze_stream(
                                     result: None,
                                     done: false,
                                 };
+                                // 플러시 보장을 위한 딜레이
+                                tokio::time::sleep(Duration::from_millis(50)).await;
                                 Some((
-                                    Ok(Event::default().json_data(&event).unwrap()),
+                                    Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                                     AnalyzeState::SaveResult {
                                         db,
                                         url: ai_data.url,
@@ -292,7 +309,7 @@ pub async fn analyze_stream(
                             } else {
                                 // 파싱 실패
                                 Some((
-                                    Ok(Event::default().data("error: AI response parse failed")),
+                                    Ok::<_, Infallible>(Event::default().data("error: AI response parse failed")),
                                     AnalyzeState::Done,
                                 ))
                             }
@@ -300,7 +317,7 @@ pub async fn analyze_stream(
                         _ => {
                             // AI 호출 실패
                             Some((
-                                Ok(Event::default().data("error: AI server error")),
+                                Ok::<_, Infallible>(Event::default().data("error: AI server error")),
                                 AnalyzeState::Done,
                             ))
                         }
@@ -314,8 +331,10 @@ pub async fn analyze_stream(
                         result: None,
                         done: false,
                     };
+                    // 플러시 보장을 위한 딜레이
+                    tokio::time::sleep(Duration::from_millis(50)).await;
                     Some((
-                        Ok(Event::default().json_data(&event).unwrap()),
+                        Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                         AnalyzeState::DoSave { db, url, description, score, status },
                     ))
                 }
@@ -338,13 +357,13 @@ pub async fn analyze_stream(
                                 done: true,
                             };
                             Some((
-                                Ok(Event::default().json_data(&event).unwrap()),
+                                Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                                 AnalyzeState::Done,
                             ))
                         }
                         Err(_) => {
                             Some((
-                                Ok(Event::default().data("error: DB save failed")),
+                                Ok::<_, Infallible>(Event::default().data("error: DB save failed")),
                                 AnalyzeState::Done,
                             ))
                         }
@@ -355,16 +374,43 @@ pub async fn analyze_stream(
         },
     );
     
-    Sse::new(stream).keep_alive(
+    let sse = Sse::new(stream).keep_alive(
         axum::response::sse::KeepAlive::new()
-            .interval(Duration::from_secs(10))
-            .text("keep-alive"),
-    )
+            .interval(Duration::from_secs(1))
+            .text("keep-alive-ping"),
+    );
+    
+    // 중요: 버퍼링 방지 헤더 추가
+    use axum::response::IntoResponse;
+    use axum::http::{header, HeaderName, HeaderValue};
+    
+    let mut response = sse.into_response();
+    let headers = response.headers_mut();
+    
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("no-cache, no-transform"),
+    );
+    headers.insert(
+        header::CONNECTION,
+        HeaderValue::from_static("keep-alive"),
+    );
+    headers.insert(
+        header::CONTENT_ENCODING,
+        HeaderValue::from_static("identity"),
+    );
+    headers.insert(
+        HeaderName::from_static("x-accel-buffering"),
+        HeaderValue::from_static("no"),
+    );
+    
+    response
 }
 
 /// 분석 상태 머신
 enum AnalyzeState {
     Start { db: DatabaseConnection, url: String },
+    Step1 { db: DatabaseConnection, url: String },
     CheckDb { db: DatabaseConnection, url: String },
     StartAi { db: DatabaseConnection, url: String },
     CallAi { db: DatabaseConnection, url: String },
