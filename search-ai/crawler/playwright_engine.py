@@ -22,6 +22,7 @@ from crawler.domain_fuzzer import DomainFuzzer, extract_domain_number
 from api_client.react_ai_client import ReactAIClient
 from api_client.backend_client import BackendClient
 from utils.url_normalizer import normalize_url, extract_apex_domain
+from utils.url_resolver import is_shortener_url, resolve_final_url
 from utils.logging_config import get_logger
 
 logger = get_logger()
@@ -312,8 +313,14 @@ class PlaywrightEngine:
         
         return matched, unmatched
     
-    async def _analyze_and_save(self, url: str) -> dict | None:
-        """URL을 AI로 분석하고 결과를 DB에 저장"""
+    async def _analyze_and_save(self, url: str, original_shortener_url: str | None = None) -> dict | None:
+        """
+        URL을 AI로 분석하고 결과를 DB에 저장
+        
+        ★ 단축 URL 처리:
+        original_shortener_url이 있으면 둘 다 DB에 저장
+        bit.ly/abc → example.com/phishing 둘 다 BLOCK 처리됨
+        """
         if not self._react_ai or not self._backend:
             return None
         
@@ -324,7 +331,7 @@ class PlaywrightEngine:
             return None
         
         try:
-            # AI 분석 요청
+            # AI 분석 요청 (최종 URL로 분석)
             result = await self._react_ai.analyze_url(url)
             
             if not result:
@@ -346,13 +353,29 @@ class PlaywrightEngine:
             else:
                 self._stats["safe"] += 1
             
-            # DB 저장
+            description = ", ".join(reasons) if reasons else None
+            
+            # ★ 최종 URL DB 저장
             await self._backend.upsert_reputation(
                 url=url,
                 score=score,
                 status=status,
-                description=", ".join(reasons) if reasons else None
+                description=description
             )
+            
+            # ★ 원본 단축 URL도 같은 평판으로 DB 저장
+            # bit.ly/abc → BLOCK, example.com/phishing → BLOCK (둘 다!)
+            if original_shortener_url:
+                await self._backend.upsert_reputation(
+                    url=original_shortener_url,
+                    score=score,
+                    status=status,
+                    description=f"→ {url}" if description is None else f"{description} (→ {url})"
+                )
+                logger.info(
+                    f"[{self.worker_name}] 🔗 단축 URL도 저장: "
+                    f"{original_shortener_url} → {status}"
+                )
             
             return result
         
@@ -369,6 +392,17 @@ class PlaywrightEngine:
         """
         if not self._context:
             return
+        
+        original_shortener_url = None  # 원본 단축 URL 저장 (나중에 DB 저장용)
+        
+        # ★ 단축 URL 리졸브: bit.ly, form.gl 등 → 최종 URL
+        if is_shortener_url(url):
+            logger.info(f"[{self.worker_name}] 🔗 단축 URL 감지: {url}")
+            resolved_url = await resolve_final_url(url)
+            if resolved_url != url:
+                logger.info(f"[{self.worker_name}] ➡️ 최종 URL: {resolved_url}")
+                original_shortener_url = url  # 원본 저장
+                url = resolved_url  # 최종 URL로 교체
         
         original_domain = extract_apex_domain(url)
         logger.info(f"[{self.worker_name}] 🕷️ {url} 진입...")
@@ -447,8 +481,8 @@ class PlaywrightEngine:
             else:
                 logger.debug(f"[{self.worker_name}] ⚠️ 링크 없음")
             
-            # AI 분석
-            result = await self._analyze_and_save(url)
+            # AI 분석 (★ 원본 단축 URL도 전달)
+            result = await self._analyze_and_save(url, original_shortener_url)
             
             # Fuzzer (위험 사이트인 경우)
             if result and result.get("status") in ("BLOCK", "WARNING") and self._fuzzer:

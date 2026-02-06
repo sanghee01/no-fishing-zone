@@ -24,7 +24,12 @@
       "type": {
         "kind": "enum",
         "name": "url_status",
-        "values": ["SAFE", "WARNING", "BLOCK"]
+        "values": [
+          "SAFE",
+          "WARNING",
+          "BLOCK",
+          "DEAD"
+        ]
       },
       "nullable": false,
       "default": "SAFE"

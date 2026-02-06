@@ -1,0 +1,66 @@
+======================================================================
+🔍 오차단/미탐지 URL 상세 분석
+======================================================================
+
+📌 악성 URL 15개 분석 중...
+  [1/15] https://approve-pending202.com/2BZH8ZWJF... → WARNING
+  [2/15] https://approve-pending202.com/OT56YDA3T... → WARNING
+  [3/15] https://approve-pending202.com/R8MQ2HWWD... → WARNING
+  [4/15] http://pub-50a5df9778fb46d6a3eac4e9e970f850.r2.dev... → WARNING
+  [5/15] https://approve-pending202.com/4JKA7XLX6... → WARNING
+  [6/15] https://approve-pending202.com/3WBMXXCS9... → WARNING
+  [7/15] https://approve-pending202.com/B7JMJJUUP... → BLOCK
+  [8/15] https://approve-pending202.com/94X441RVJ... → WARNING
+  [9/15] https://approve-pending202.com/KGVCRWOK7... → WARNING
+  [10/15] http://amazon-clone-ruby-eight.vercel.app/orders.h... → SAFE
+  [11/15] https://approve-pending202.com/7IYXO7U8W... → WARNING
+  [12/15] https://approve-pending202.com/4C5XJWRC8... → WARNING
+  [13/15] https://meazt.cn/... → SAFE
+  [14/15] https://txdmv.fdgwv.cc/pay... → BLOCK
+  [15/15] https://approve-pending202.com/5IYNS5R1D... → WARNING
+
+📌 정상 URL 15개 분석 중...
+  [1/15] https://doklist.com... → SAFE
+  [2/15] https://mil.am... → SAFE
+  [3/15] https://lifestyle.bg... → SAFE
+  [4/15] https://eezi.co.za... → WARNING
+  [5/15] https://ped-kopilka.ru... → SAFE
+  [6/15] https://miemipesca.com... → SAFE
+  [7/15] https://bizfarmrx.com... → BLOCK
+  [8/15] https://softmajor.ru... → SAFE
+  [9/15] https://lookpic.com... → SAFE
+  [10/15] https://legl.com... → SAFE
+  [11/15] https://caffecinema.com... → SAFE
+  [12/15] https://clarks.com... → SAFE
+  [13/15] https://bioskop21.one... → SAFE
+  [14/15] https://abanet.it... → SAFE
+  [15/15] https://pbabes.com... → SAFE
+
+======================================================================
+❌ 미탐지 (악성 → SAFE): 2개
+======================================================================
+
+--- [1] 미탐지 ---
+URL: http://amazon-clone-ruby-eight.vercel.app/orders.html
+점수: 19
+판정 이유:
+
+--- [2] 미탐지 ---
+URL: https://meazt.cn/
+점수: 15
+판정 이유:
+
+======================================================================
+❌ 오차단 (정상 → BLOCK): 1개
+======================================================================
+
+--- [1] 오차단 ---
+URL: https://bizfarmrx.com
+점수: 38
+판정 이유:
+
+======================================================================
+📊 요약
+======================================================================
+  미탐지 (악성 → SAFE): 2/15 (13.3%)
+  오차단 (정상 → BLOCK): 1/15 (6.7%)

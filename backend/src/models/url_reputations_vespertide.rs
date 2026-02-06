@@ -10,6 +10,8 @@ pub enum UrlStatus {
     WARNING,
     #[sea_orm(string_value = "BLOCK")]
     BLOCK,
+    #[sea_orm(string_value = "DEAD")]
+    DEAD,
 }
 
 #[sea_orm::model]

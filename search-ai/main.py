@@ -87,7 +87,7 @@ async def run_static_import(seeds_dir: Path, backend_url: str) -> set[str]:
         results = await worker.run_all()
         logger.info(
             f"[Static] ✅ 화이트리스트: {results['whitelist_count']}개, "
-            f"PhishTank: {results['phishtank_success']}개"
+            f"OpenPhish: {results['openphish_success']}개"
         )
         return worker.whitelist
     except Exception as e:
