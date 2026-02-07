@@ -1,4 +1,5 @@
-import { Center, Flex, Image, Text, VStack } from "@devup-ui/react";
+import { Box, Center, Flex, Text, VStack } from "@devup-ui/react";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 interface PageLayoutProps {
@@ -60,13 +61,21 @@ export function PageLayoutFooter() {
       py={["16px", null, null, null, "64px"]}
     >
       <Flex alignItems="center" gap="8px">
-        <Image
-          src="/images/logo.png"
-          alt="낚시금지구역 로고"
+        <Box
+          position="relative"
           borderRadius="67px"
           aspectRatio="1"
           boxSize={["48px", null, null, null, "134px"]}
-        />
+          overflow="hidden"
+        >
+          <Image
+            src="/images/logo.png"
+            alt="낚시금지구역 로고"
+            fill
+            priority
+            style={{ objectFit: "cover" }}
+          />
+        </Box>
         <VStack>
           <Text
             color="$black"
