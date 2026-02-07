@@ -1,7 +1,7 @@
 use sea_orm::Database;
 use vespera::vespera;
 use tower_http::cors::CorsLayer;
-use axum::routing::get;
+// use axum::routing::{get, post};
 
 mod routes;
 mod models;
@@ -18,6 +18,9 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn run() -> anyhow::Result<()> {
+    // 0. .env 파일 로드 (로컬 개발용)
+    dotenv::dotenv().ok();
+
     // 1. 환경변수가 없으면 로컬 개발용 기본값 사용
     let database_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgresql://localhost/aegis_link_db".to_string());
@@ -37,7 +40,7 @@ async fn run() -> anyhow::Result<()> {
     let sse_router = axum::Router::new()
         .route(
             "/url-reputations/analyze-stream",
-            get(routes::url_reputations::analyze_stream),
+            axum::routing::post(routes::url_reputations::analyze_stream),
         )
         .with_state(db.clone());
 
@@ -53,8 +56,8 @@ async fn run() -> anyhow::Result<()> {
     .merge(sse_router)
     .layer(cors);
 
-    // 5. 서버 시작 (기본 포트 8000)
-    let port = std::env::var("PORT").unwrap_or_else(|_| "8000".to_string());
+    // 5. 서버 시작 (기본 포트 8080 - 로컬 개발용, Docker와 충돌 방지)
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);
     
     let listener = tokio::net::TcpListener::bind(&addr).await?;

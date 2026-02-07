@@ -161,7 +161,7 @@ struct ProgressEvent {
 /// - step 3: 증거 자료 수집 (결과 저장)
 pub async fn analyze_stream(
     State(db): State<DatabaseConnection>,
-    Query(query): Query<GetUrlQuery>,
+    Json(query): Json<GetUrlQuery>,
 ) -> impl axum::response::IntoResponse {
     let url = query.url.clone();
     
@@ -170,11 +170,15 @@ pub async fn analyze_stream(
         |state| async move {
             match state {
                 AnalyzeState::Start { db, url } => {
-                    // Cloudflare 버퍼링 방지를 위한 초기 패딩 (110KB - Quick Tunnel 강제 Flush용)
-                    // Quick Tunnel은 대시보드 설정이 불가능하므로 무식하게 버퍼를 채워야 함
-                    let padding = " ".repeat(1024 * 110);
+                    // Step 1: 접속 기록 분석 시작
+                    let event = ProgressEvent {
+                        step: 1,
+                        status: "in_progress".to_string(),
+                        result: None,
+                        done: false,
+                    };
                     Some((
-                        Ok::<_, Infallible>(Event::default().comment(padding)),
+                        Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                         AnalyzeState::Step1 { db, url },
                     ))
                 }
@@ -278,14 +282,28 @@ pub async fn analyze_stream(
                             }
                             
                             if let Ok(ai_data) = response.json::<AiResponse>().await {
-                                let status_enum = match ai_data.status.as_str() {
-                                    "SAFE" => UrlStatus::SAFE,
-                                    "WARNING" => UrlStatus::WARNING,
-                                    _ => UrlStatus::BLOCK,
-                                };
+                                // AI 응답 로깅
+                                println!("🤖 AI Response: status={}, score={}, reasons={:?}", ai_data.status, ai_data.risk_score, ai_data.reasons);
+
                                 let description = ai_data.reasons
+                                    .clone()
                                     .filter(|r| !r.is_empty())
                                     .map(|r| r.join(", "));
+
+                                let mut status_enum = match ai_data.status.as_str() {
+                                    "SAFE" => UrlStatus::SAFE,
+                                    "WARNING" => UrlStatus::WARNING,
+                                    "DEAD" => UrlStatus::DEAD,
+                                    _ => UrlStatus::BLOCK,
+                                };
+
+                                // AI가 크롤링 실패(HTML 내용 없음 등)를 SAFE로 반환하는 경우 DEAD로 보정
+                                if let Some(desc) = &description {
+                                    if desc.contains("HTML 내용 없음") || desc.contains("오류 발생") || desc.contains("단계 건너뜀") {
+                                        println!("⚠️ Detected crawl failure in description. Forcing status to DEAD.");
+                                        status_enum = UrlStatus::DEAD;
+                                    }
+                                }
                                 
                                 // Step 2 완료
                                 let event = ProgressEvent {
@@ -309,15 +327,16 @@ pub async fn analyze_stream(
                             } else {
                                 // 파싱 실패
                                 Some((
-                                    Ok::<_, Infallible>(Event::default().data("error: AI response parse failed")),
+                                    Ok::<_, Infallible>(Event::default().json_data(&serde_json::json!({"error": "AI response parse failed"})).unwrap()),
                                     AnalyzeState::Done,
                                 ))
                             }
                         }
                         _ => {
                             // AI 호출 실패
+                            println!("❌ AI Server request failed. Result: {:?}", ai_result);
                             Some((
-                                Ok::<_, Infallible>(Event::default().data("error: AI server error")),
+                                Ok::<_, Infallible>(Event::default().json_data(&serde_json::json!({"error": "AI server error"})).unwrap()),
                                 AnalyzeState::Done,
                             ))
                         }
@@ -363,7 +382,7 @@ pub async fn analyze_stream(
                         }
                         Err(_) => {
                             Some((
-                                Ok::<_, Infallible>(Event::default().data("error: DB save failed")),
+                                Ok::<_, Infallible>(Event::default().json_data(&serde_json::json!({"error": "DB save failed"})).unwrap()),
                                 AnalyzeState::Done,
                             ))
                         }
