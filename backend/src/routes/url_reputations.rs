@@ -190,8 +190,7 @@ pub async fn analyze_stream(
                         result: None,
                         done: false,
                     };
-                    // 플러시 보장을 위한 딜레이
-                    tokio::time::sleep(Duration::from_millis(50)).await;
+
                     Some((
                         Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                         AnalyzeState::CheckDb { db, url },
@@ -248,8 +247,7 @@ pub async fn analyze_stream(
                         result: None,
                         done: false,
                     };
-                    // 플러시 보장을 위한 딜레이
-                    tokio::time::sleep(Duration::from_millis(50)).await;
+
                     Some((
                         Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                         AnalyzeState::CallAi { db, url },
@@ -350,8 +348,7 @@ pub async fn analyze_stream(
                         result: None,
                         done: false,
                     };
-                    // 플러시 보장을 위한 딜레이
-                    tokio::time::sleep(Duration::from_millis(50)).await;
+
                     Some((
                         Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                         AnalyzeState::DoSave { db, url, description, score, status },

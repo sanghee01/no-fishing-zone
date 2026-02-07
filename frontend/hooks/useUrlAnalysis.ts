@@ -71,12 +71,10 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
           onmessage(event) {
             // 빈 메시지는 무시
             if (!event.data) {
-              // console.log("SSE received empty data, skipping");
               return;
             }
 
             try {
-              // console.log("SSE raw data:", event.data);
               const data = JSON.parse(event.data);
 
               // 진행 상태 업데이트
