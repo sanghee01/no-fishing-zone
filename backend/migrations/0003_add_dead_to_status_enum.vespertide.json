@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dev-five-git/vespertide/refs/heads/main/schemas/migration.schema.json",
+  "actions": [
+    {
+      "column": "status",
+      "new_type": {
+        "kind": "enum",
+        "name": "url_status",
+        "values": [
+          "SAFE",
+          "WARNING",
+          "BLOCK",
+          "DEAD"
+        ]
+      },
+      "table": "url_reputations",
+      "type": "modify_column_type"
+    }
+  ],
+  "comment": "add dead to status enum",
+  "created_at": "2026-02-07T02:50:40Z",
+  "version": 3
+}
