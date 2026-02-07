@@ -20,6 +20,9 @@ COPY . .
 # 빌드 중 텔레메트리(telemetry) 비활성화.
 ENV NEXT_TELEMETRY_DISABLED 1
 
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 RUN npm run build
 
 # 프로덕션 이미지, 모든 파일을 복사하고 next 실행

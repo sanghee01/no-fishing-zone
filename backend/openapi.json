@@ -176,7 +176,8 @@
         "enum": [
           "SAFE",
           "WARNING",
-          "BLOCK"
+          "BLOCK",
+          "DEAD"
         ]
       }
     }
