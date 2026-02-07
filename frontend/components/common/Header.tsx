@@ -32,8 +32,9 @@ export function Header({ title, subTitle, image, color }: HeaderProps) {
       </VStack>
       <Image
         src={`/images/${image}.png`}
-        alt="Caution Triangle"
+        alt=""
         w={["100px", null, null, null, "140px"]}
+        h={["100px", null, null, null, "140px"]}
         objectFit="contain"
       />
     </VStack>
