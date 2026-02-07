@@ -11,7 +11,7 @@ export function UrlInputForm() {
   const handleSearch = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!url.trim()) return;
-    router.push(`/?url=${encodeURIComponent(url)}`);
+    router.push(`/?url=${encodeURIComponent(url.trim())}`);
   };
 
   return (
