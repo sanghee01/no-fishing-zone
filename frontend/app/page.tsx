@@ -8,7 +8,9 @@ import { DangerView } from "@/ui/DangerView";
 import { CautionView } from "@/ui/CautionView";
 import { SafeView } from "@/ui/SafeView";
 import { NotExistView } from "@/ui/NotExistView";
+import { UrlInputForm } from "@/ui/UrlInputForm";
 import { getUrlReputation } from "@/lib/api";
+import { Flex } from "@devup-ui/react";
 
 export default async function HomePage({
   searchParams,
@@ -18,29 +20,21 @@ export default async function HomePage({
   const { url } = await searchParams;
   const targetUrl = typeof url === "string" ? url : null;
 
-  // URL이 없으면 안내 메시지
+  // URL이 없으면 URL 입력 화면
   if (!targetUrl) {
     return (
       <PageLayoutRoot>
         <PageLayoutContent>
-          <div style={{ marginTop: "100px", textAlign: "center" }}>
-            <h1
-              style={{
-                fontSize: "2.5rem",
-                fontWeight: "800",
-                marginBottom: "1rem",
-                color: "#1E293B",
-              }}
-            >
-              URL 평판 조회
-            </h1>
-            <p style={{ fontSize: "1.2rem", color: "#64748B" }}>
-              조회할 URL을 입력해주세요.
-            </p>
-            <p style={{ marginTop: "2rem", color: "#94A3B8" }}>
-              예시: ?url=https://example.com
-            </p>
-          </div>
+          <Flex
+            w="100%"
+            h="100%"
+            flex="1"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <UrlInputForm />
+          </Flex>
         </PageLayoutContent>
         <PageLayoutFooter />
       </PageLayoutRoot>

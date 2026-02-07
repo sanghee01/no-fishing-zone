@@ -17,7 +17,7 @@ export function BackToSafetyButton() {
       boxShadow="0 5px 15px 0 rgba(0, 0, 0, 0.25)"
       textDecoration="none"
       cursor="pointer"
-      _hover={{ bg: "#00284F" }}
+      _hover={{ bg: "$primaryDark" }}
     >
       <Box position="relative" boxSize="24px">
         <Image
