@@ -1,4 +1,4 @@
-export type UrlReputationStatus = "SAFE" | "WARNING" | "BLOCK";
+export type UrlReputationStatus = "SAFE" | "WARNING" | "BLOCK" | "DEAD";
 
 export interface UrlReputationResponse {
   url: string;

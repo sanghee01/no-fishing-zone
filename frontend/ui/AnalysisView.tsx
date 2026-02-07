@@ -12,6 +12,7 @@ import { Title } from "@/components/common/Title";
 import { DangerView } from "./DangerView";
 import { CautionView } from "./CautionView";
 import { SafeView } from "./SafeView";
+import { NotExistView } from "./NotExistView";
 import { ErrorView } from "@/components/common/ErrorView";
 
 export type { StepStatus };
@@ -35,6 +36,8 @@ export function AnalysisView({ url }: AnalysisViewProps) {
         return <CautionView data={result} url={url} />;
       case "SAFE":
         return <SafeView data={result} url={url} />;
+      case "DEAD":
+        return <NotExistView data={result} url={url} />;
     }
   }
 

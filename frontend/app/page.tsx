@@ -7,6 +7,7 @@ import { AnalysisView } from "@/ui/AnalysisView";
 import { DangerView } from "@/ui/DangerView";
 import { CautionView } from "@/ui/CautionView";
 import { SafeView } from "@/ui/SafeView";
+import { NotExistView } from "@/ui/NotExistView";
 import { getUrlReputation } from "@/lib/api";
 
 export default async function HomePage({
@@ -58,6 +59,8 @@ export default async function HomePage({
         return <CautionView data={existingResult} url={targetUrl} />;
       case "SAFE":
         return <SafeView data={existingResult} url={targetUrl} />;
+      case "DEAD":
+        return <NotExistView data={existingResult} url={targetUrl} />;
     }
   }
 

@@ -13,6 +13,7 @@
     "@devup-api/next-plugin": "^0.1.9",
     "@devup-ui/next-plugin": "^1.0.68",
     "@devup-ui/react": "^1.0.32",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "react": "19.2.3",

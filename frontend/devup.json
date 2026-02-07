@@ -13,6 +13,7 @@
         "danger": "#E00E05",
         "safe": "#22C55E",
         "warning": "#FFB200",
+        "dead": "#64748B",
         "background": "#F8FAFC"
       }
     },

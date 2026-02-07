@@ -68,6 +68,8 @@ services:
     restart: always
     expose:
       - 8001
+    ports:
+      - "8001:8001"
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     healthcheck:
@@ -96,6 +98,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: /
     restart: always
     expose:
       - 3000
@@ -164,7 +168,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       # 외부에서 접근 가능하도록 포트 노출 (개발용)
-      - "5432:5432"
+      # 로컬 PC의 5432 포트가 이미 사용 중(Homebrew Postgres)이므로 5433으로 변경
+      - "5433:5432"
     healthcheck:
       # PostgreSQL이 준비되었는지 확인
       test: ["CMD-SHELL", "pg_isready -U aegis_user -d aegis_link_db"]
