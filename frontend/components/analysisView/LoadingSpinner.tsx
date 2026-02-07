@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Center, Image, Text, VStack } from "@devup-ui/react";
+import { Box, Center, Text, VStack } from "@devup-ui/react";
+import Image from "next/image";
 import { keyframes } from "@devup-ui/react";
 
 const spin = keyframes({
@@ -60,12 +61,14 @@ export function LoadingSpinner() {
         border="1px solid #F1F5F9"
       >
         <VStack alignItems="center" gap="8px">
-          <Image
-            src="/images/analyze.png"
-            alt="analyze-icon"
-            boxSize={["52px", null, null, null, "76px"]}
-            objectFit="contain"
-          />
+          <Box position="relative" boxSize={["52px", null, null, null, "76px"]}>
+            <Image
+              src="/images/analyze.png"
+              alt="analyze-icon"
+              fill
+              style={{ objectFit: "contain" }}
+            />
+          </Box>
           <Text
             color="#003366"
             fontFamily="Noto Sans KR"

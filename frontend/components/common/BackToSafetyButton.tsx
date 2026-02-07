@@ -1,4 +1,5 @@
-import { Flex, Image, Text } from "@devup-ui/react";
+import { Box, Flex, Text } from "@devup-ui/react";
+import Image from "next/image";
 
 export function BackToSafetyButton() {
   return (
@@ -18,7 +19,14 @@ export function BackToSafetyButton() {
       cursor="pointer"
       _hover={{ bg: "#00284F" }}
     >
-      <Image src="/images/shield-icon.png" alt="" boxSize="24px" />
+      <Box position="relative" boxSize="24px">
+        <Image
+          src="/images/shield-icon.png"
+          alt=""
+          fill
+          style={{ objectFit: "contain" }}
+        />
+      </Box>
       <Text fontWeight="700" fontSize={["15px", null, null, null, "18px"]}>
         안전한 페이지로 돌아가기
       </Text>
