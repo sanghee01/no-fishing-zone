@@ -33,7 +33,7 @@ export function NotExistView({ data }: NotExistViewProps) {
           borderLeft="solid 7px $dead"
           borderRadius="0 20px 20px 0"
           boxShadow="0 3px 7px 0 rgba(0, 0, 0, 0.25)"
-          gap="28px"
+          gap="20px"
           p={["24px", null, null, null, "40px"]}
           w="100%"
           maxW="640px"
@@ -71,7 +71,8 @@ export function NotExistView({ data }: NotExistViewProps) {
             >
               주소를 다시 확인하거나 메인 페이지로 이동하여 이용하기 바랍니다.
             </Text>
-            {data.description && (
+            {/* TODO: AI 프롬프팅 개선 후 적용 */}
+            {/* {data.description && (
               <Text
                 color="$text"
                 fontSize={["14px", null, null, null, "16px"]}
@@ -81,7 +82,7 @@ export function NotExistView({ data }: NotExistViewProps) {
               >
                 상세 정보: {data.description}
               </Text>
-            )}
+            )} */}
           </VStack>
         </VStack>
         <Flex

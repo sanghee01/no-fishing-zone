@@ -40,7 +40,7 @@ export function SafeView({ data, url }: SafeViewProps) {
           maxW="640px"
         >
           <Box w="8px" bg="$safe" flexShrink={0} />
-          <VStack gap="28px" p={["24px", null, null, null, "40px"]} flex={1}>
+          <VStack gap="20px" p={["24px", null, null, null, "40px"]} flex={1}>
             <BoxTitle
               title="VERIFIED ACCESS"
               icon={
@@ -77,7 +77,8 @@ export function SafeView({ data, url }: SafeViewProps) {
                 사용자 보호를 위해 실시간 보호 스캔이 적용되고 있으며, 현재
                 페이지는 안전하게 이용할 수 있습니다.
               </Text>
-              {data.description && (
+              {/* TODO: AI 프롬프팅 개선 후 적용 */}
+              {/* {data.description && (
                 <Text
                   color="$text"
                   fontSize={["14px", null, null, null, "16px"]}
@@ -87,7 +88,7 @@ export function SafeView({ data, url }: SafeViewProps) {
                 >
                   검사 결과: {data.description}
                 </Text>
-              )}
+              )} */}
             </VStack>
           </VStack>
         </Flex>

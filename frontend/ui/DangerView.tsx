@@ -33,7 +33,7 @@ export function DangerView({ data }: DangerViewProps) {
           borderLeft="solid 7px $danger"
           borderRadius="0 20px 20px 0"
           boxShadow="0 3px 7px 0 rgba(0, 0, 0, 0.25)"
-          gap="28px"
+          gap="20px"
           p={["24px", null, null, null, "40px"]}
           w="100%"
           maxW="640px"
@@ -72,7 +72,8 @@ export function DangerView({ data }: DangerViewProps) {
               해당 사이트 이용 시 법적 책임이 발생할 수 있으므로 더 이상의
               접근을 권장하지 않습니다.
             </Text>
-            <Text
+            {/* TODO: AI 프롬프팅 개선 후 적용 */}
+            {/* <Text
               color="$text"
               fontSize={["14px", null, null, null, "16px"]}
               fontWeight="400"
@@ -80,7 +81,7 @@ export function DangerView({ data }: DangerViewProps) {
               wordBreak="keep-all"
             >
               상세 사유: {data.description}
-            </Text>
+            </Text> */}
           </VStack>
         </VStack>
         <Flex
