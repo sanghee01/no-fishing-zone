@@ -1,7 +1,8 @@
 import { Flex, Box, Text, VStack } from "@devup-ui/react";
+import Image from "next/image";
 import { PageLayout } from "./layout/PageLayout";
 import type { UrlReputationResponse } from "@/lib/api";
-import { BackToSafetyButton } from "@/components/common/BackToSafetyButton";
+import { PrimaryLinkButton } from "@/components/common/PrimaryLinkButton";
 import { Title } from "@/components/common/Title";
 import { Header } from "@/components/common/Header";
 import { BoxTitle } from "@/components/common/BoxTitle";
@@ -88,7 +89,20 @@ export function DangerView({ data }: DangerViewProps) {
           justifyContent="center"
           flexDir={["column", null, null, null, "row"]}
         >
-          <BackToSafetyButton />
+          <PrimaryLinkButton
+            label="안전한 페이지로 돌아가기"
+            href="https://www.google.com"
+            icon={
+              <Box position="relative" boxSize="24px">
+                <Image
+                  src="/images/shield-icon.png"
+                  alt=""
+                  fill
+                  style={{ objectFit: "contain" }}
+                />
+              </Box>
+            }
+          />
         </Flex>
       </PageLayout.Content>
 

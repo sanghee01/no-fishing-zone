@@ -10,7 +10,9 @@ import { SafeView } from "@/ui/SafeView";
 import { NotExistView } from "@/ui/NotExistView";
 import { UrlInputForm } from "@/ui/UrlInputForm";
 import { getUrlReputation } from "@/lib/api";
-import { Flex } from "@devup-ui/react";
+import { Flex, VStack } from "@devup-ui/react";
+import { Header } from "@/components/common/Header";
+import { Title } from "@/components/common/Title";
 
 export default async function HomePage({
   searchParams,
@@ -32,7 +34,19 @@ export default async function HomePage({
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
+            gap={["30px", null, null, null, "40px"]}
+            pt={["60px", null, null, null, "100px"]}
           >
+            <VStack
+              alignItems="center"
+              gap={["24px", null, null, null, "32px"]}
+            >
+              <Header
+                title="SEARCH"
+                subTitle="안전 검사할 URL을 입력해주세요."
+                color="var(--primary)"
+              />
+            </VStack>
             <UrlInputForm />
           </Flex>
         </PageLayoutContent>
