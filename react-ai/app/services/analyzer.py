@@ -23,7 +23,7 @@ from app.models import AnalyzeRequest, AnalyzeResponse, PhaseResult
 from app.services.whitelist import check_whitelist      # Phase 0
 from app.services.redirect import track_redirects       # Phase 1
 from app.services.metadata import analyze_metadata      # Phase 2
-from app.services.ai_analyzer import analyze_with_ai    # Phase 3
+from app.services.ai_analyzer import analyze_with_ai, analyze_url_only  # Phase 3 + Fallback
 from app.services.search_verifier import verify_with_search  # Phase 4
 
 logger = logging.getLogger(__name__)
@@ -145,11 +145,19 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
         all_reasons.append("Phase 2: 오류 발생 - 건너뜀")
     
     # ============================================
-    # Phase 3: Claude AI 시맨틱 분석
+    # Phase 3: Claude AI 시맨틱 분석 (v4 - URL-Only Fallback 추가)
     # ============================================
     # HTML 내용을 AI가 분석하여 브랜드/위험도 추출
+    # v4 개선: HTML 없으면 URL만으로 분석 (Recall 개선)
     try:
-        phase3_result = await analyze_with_ai(html_content)
+        if html_content:
+            # HTML 있으면 정상 분석
+            phase3_result = await analyze_with_ai(html_content)
+        else:
+            # HTML 없으면 URL-Only Fallback 분석
+            logger.info(f"🔄 [{request.request_id}] HTML 없음 - URL-Only AI 분석 실행")
+            phase3_result = await analyze_url_only(url)
+        
         total_score += phase3_result.score
         all_reasons.extend(phase3_result.reasons)
         

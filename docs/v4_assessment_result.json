@@ -1,0 +1,42 @@
+{
+  "test_info": {
+    "total_urls": 600,
+    "malicious_urls": 300,
+    "benign_urls": 300,
+    "malicious_source": "OpenPhish",
+    "benign_source": "Tranco Top 1M"
+  },
+  "confusion_matrix": {
+    "malicious": {
+      "BLOCK": 32,
+      "WARNING": 219,
+      "SAFE": 49,
+      "DEAD": 0
+    },
+    "benign": {
+      "BLOCK": 21,
+      "WARNING": 159,
+      "SAFE": 120,
+      "DEAD": 0
+    }
+  },
+  "statistics": {
+    "malicious_total_excluding_dead": 300,
+    "malicious_detected": 251,
+    "malicious_missed": 49,
+    "benign_total_excluding_dead": 300,
+    "benign_correct": 279,
+    "benign_blocked": 21
+  },
+  "metrics": {
+    "TP": 251,
+    "FP": 21,
+    "FN": 49,
+    "TN": 279,
+    "precision": 0.9228,
+    "recall": 0.8367,
+    "f1_score": 0.8776,
+    "detection_rate": 0.8367,
+    "false_positive_rate": 0.07
+  }
+}
