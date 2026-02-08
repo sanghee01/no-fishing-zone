@@ -1,11 +1,11 @@
 import { Flex, Box, Text, VStack } from "@devup-ui/react";
 import { PageLayout } from "./layout/PageLayout";
 import type { UrlReputationResponse } from "@/lib/api";
-import { BackToSafetyButton } from "@/components/common/BackToSafetyButton";
+import { PrimaryLinkButton } from "@/components/common/PrimaryLinkButton";
 import { Title } from "@/components/common/Title";
 import { Header } from "@/components/common/Header";
 import { BoxTitle } from "@/components/common/BoxTitle";
-import { Unplug } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface NotExistViewProps {
   data: UrlReputationResponse;
@@ -18,12 +18,12 @@ export function NotExistView({ data }: NotExistViewProps) {
       <PageLayout.Header>
         <VStack alignItems="center" gap={["24px", null, null, null, "32px"]}>
           <Header
-            title="DEAD"
+            title="NOT FOUND"
             subTitle="SITE NOT REACHABLE"
-            image="dead"
+            image="not-found"
             color="var(--dead)"
           />
-          <Title title="사이트에 연결할 수 없습니다." />
+          <Title title="존재하지 않는 페이지입니다." />
         </VStack>
       </PageLayout.Header>
 
@@ -33,16 +33,16 @@ export function NotExistView({ data }: NotExistViewProps) {
           borderLeft="solid 7px $dead"
           borderRadius="0 20px 20px 0"
           boxShadow="0 3px 7px 0 rgba(0, 0, 0, 0.25)"
-          gap="28px"
+          gap="20px"
           p={["24px", null, null, null, "40px"]}
           w="100%"
           maxW="640px"
         >
           <BoxTitle
-            title="CONNECTION FAILED"
+            title="PAGE INFORMATION"
             icon={
               <Box boxSize={["24px", null, null, null, "32px"]}>
-                <Unplug
+                <Info
                   size="100%"
                   color="var(--white)"
                   fill="var(--dead)"
@@ -59,8 +59,8 @@ export function NotExistView({ data }: NotExistViewProps) {
               lineHeight="1.6"
               wordBreak="keep-all"
             >
-              해당 웹사이트는 현재 비활성화되어 있거나 서버에 연결할 수 없는
-              상태입니다.
+              입력하신 주소가 올바르지 않거나, 요청하신 페이지가 이동 또는
+              삭제되어 현재 찾을 수 없습니다.
             </Text>
             <Text
               color="$text"
@@ -69,10 +69,10 @@ export function NotExistView({ data }: NotExistViewProps) {
               lineHeight="1.6"
               wordBreak="keep-all"
             >
-              일시적인 장애이거나 폐쇄된 사이트일 수 있습니다. 접속하려는 URL을
-              다시 한 번 확인해주세요.
+              주소를 다시 확인하거나 메인 페이지로 이동하여 이용하기 바랍니다.
             </Text>
-            {data.description && (
+            {/* TODO: AI 프롬프팅 개선 후 적용 */}
+            {/* {data.description && (
               <Text
                 color="$text"
                 fontSize={["14px", null, null, null, "16px"]}
@@ -82,7 +82,7 @@ export function NotExistView({ data }: NotExistViewProps) {
               >
                 상세 정보: {data.description}
               </Text>
-            )}
+            )} */}
           </VStack>
         </VStack>
         <Flex
@@ -91,7 +91,7 @@ export function NotExistView({ data }: NotExistViewProps) {
           justifyContent="center"
           flexDir={["column", null, null, null, "row"]}
         >
-          <BackToSafetyButton />
+          <PrimaryLinkButton label="메인 페이지로 이동" href="/" />
         </Flex>
       </PageLayout.Content>
 

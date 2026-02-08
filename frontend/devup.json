@@ -5,6 +5,8 @@
         "black": "#000000",
         "white": "#FFFFFF",
         "gray": "#E1E1E1",
+        "lightGray": "#64748B",
+        "hoverGray": "#F8FAFC",
         "text": "#1A1A1A",
         "textLight": "#153556B2",
         "disabled": "#CCC",
@@ -12,9 +14,9 @@
         "primaryDark": "#00284F",
         "primaryLight": "#E2E8F0",
         "danger": "#E00E05",
-        "safe": "#22C55E",
+        "safe": "#82B109",
         "warning": "#FFB200",
-        "dead": "#64748B",
+        "dead": "#56636E",
         "background": "#F8FAFC"
       }
     },

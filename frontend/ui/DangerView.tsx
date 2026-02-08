@@ -1,7 +1,8 @@
 import { Flex, Box, Text, VStack } from "@devup-ui/react";
+import Image from "next/image";
 import { PageLayout } from "./layout/PageLayout";
 import type { UrlReputationResponse } from "@/lib/api";
-import { BackToSafetyButton } from "@/components/common/BackToSafetyButton";
+import { PrimaryLinkButton } from "@/components/common/PrimaryLinkButton";
 import { Title } from "@/components/common/Title";
 import { Header } from "@/components/common/Header";
 import { BoxTitle } from "@/components/common/BoxTitle";
@@ -32,7 +33,7 @@ export function DangerView({ data }: DangerViewProps) {
           borderLeft="solid 7px $danger"
           borderRadius="0 20px 20px 0"
           boxShadow="0 3px 7px 0 rgba(0, 0, 0, 0.25)"
-          gap="28px"
+          gap="20px"
           p={["24px", null, null, null, "40px"]}
           w="100%"
           maxW="640px"
@@ -71,7 +72,8 @@ export function DangerView({ data }: DangerViewProps) {
               해당 사이트 이용 시 법적 책임이 발생할 수 있으므로 더 이상의
               접근을 권장하지 않습니다.
             </Text>
-            <Text
+            {/* TODO: AI 프롬프팅 개선 후 적용 */}
+            {/* <Text
               color="$text"
               fontSize={["14px", null, null, null, "16px"]}
               fontWeight="400"
@@ -79,7 +81,7 @@ export function DangerView({ data }: DangerViewProps) {
               wordBreak="keep-all"
             >
               상세 사유: {data.description}
-            </Text>
+            </Text> */}
           </VStack>
         </VStack>
         <Flex
@@ -88,7 +90,20 @@ export function DangerView({ data }: DangerViewProps) {
           justifyContent="center"
           flexDir={["column", null, null, null, "row"]}
         >
-          <BackToSafetyButton />
+          <PrimaryLinkButton
+            label="안전한 페이지로 돌아가기"
+            href="https://www.google.com"
+            icon={
+              <Box position="relative" boxSize="24px">
+                <Image
+                  src="/images/shield-icon.png"
+                  alt=""
+                  fill
+                  style={{ objectFit: "contain" }}
+                />
+              </Box>
+            }
+          />
         </Flex>
       </PageLayout.Content>
 

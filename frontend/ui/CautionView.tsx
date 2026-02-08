@@ -1,7 +1,8 @@
 import { Box, Flex, Text, VStack } from "@devup-ui/react";
+import Image from "next/image";
 import { PageLayout } from "./layout/PageLayout";
 import type { UrlReputationResponse } from "@/lib/api";
-import { BackToSafetyButton } from "@/components/common/BackToSafetyButton";
+import { PrimaryLinkButton } from "@/components/common/PrimaryLinkButton";
 import { ContinueButton } from "@/components/common/ContinueButton";
 import { Shield, CircleCheck } from "lucide-react";
 import { Title } from "@/components/common/Title";
@@ -37,7 +38,7 @@ export function CautionView({ data, url }: CautionViewProps) {
           bg="$white"
           borderRadius="20px"
           boxShadow="0 3px 7px 0 rgba(0, 0, 0, 0.25)"
-          gap={["20px", null, null, null, "40px"]}
+          gap="20px"
           p={["24px", null, null, null, "40px"]}
           w="100%"
           maxW="640px"
@@ -86,7 +87,8 @@ export function CautionView({ data, url }: CautionViewProps) {
               브라우저 주소창에 자물쇠 아이콘이 표시되지 않거나 인증서 오류가
               발생하는지 확인하시기 바랍니다.
             </Text>
-            <Text
+            {/* TODO: AI 프롬프팅 개선 후 적용 */}
+            {/* <Text
               as="li"
               color="$text"
               fontSize="15px"
@@ -94,7 +96,7 @@ export function CautionView({ data, url }: CautionViewProps) {
               wordBreak="keep-all"
             >
               상세 사유: {data.description}
-            </Text>
+            </Text> */}
           </VStack>
         </VStack>
         <VStack
@@ -174,8 +176,21 @@ export function CautionView({ data, url }: CautionViewProps) {
           maxW="640px"
           flexDir={["column", null, null, null, "row"]}
         >
-          <BackToSafetyButton />
-          <ContinueButton url={url} />
+          <PrimaryLinkButton
+            label="안전한 페이지로 돌아가기"
+            href="https://www.google.com"
+            icon={
+              <Box position="relative" boxSize="24px">
+                <Image
+                  src="/images/shield-icon.png"
+                  alt=""
+                  fill
+                  style={{ objectFit: "contain" }}
+                />
+              </Box>
+            }
+          />
+          <ContinueButton url={url} color="white" />
         </Flex>
       </PageLayout.Content>
 

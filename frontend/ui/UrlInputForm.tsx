@@ -15,32 +15,7 @@ export function UrlInputForm() {
   };
 
   return (
-    <VStack
-      w="100%"
-      maxW="600px"
-      gap="24px"
-      as="form"
-      onSubmit={handleSearch}
-      alignItems="center"
-    >
-      <VStack alignItems="center" gap="8px">
-        <Text
-          fontSize={["24px", null, null, null, "40px"]}
-          fontWeight="800"
-          color="$text"
-          textAlign="center"
-        >
-          URL 안전 검사
-        </Text>
-        <Text
-          fontSize={["16px", null, null, null, "20px"]}
-          color="$textLight"
-          textAlign="center"
-        >
-          조회할 URL을 입력해주세요.
-        </Text>
-      </VStack>
-
+    <VStack w="100%" maxW="600px" gap="24px" as="form" onSubmit={handleSearch}>
       <Input
         autoFocus
         value={url}
