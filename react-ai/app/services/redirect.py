@@ -26,7 +26,8 @@ from app.config import (
     REDIRECT_SCORE_PER_HOP,  # 리다이렉트 1회당 점수 (+5)
     MAX_REDIRECT_HOPS,       # 최대 리다이렉트 허용 횟수 (20)
     REQUEST_TIMEOUT,         # 요청 타임아웃 (10초)
-    USER_AGENT               # 브라우저 위장용 User-Agent
+    USER_AGENT,              # 브라우저 위장용 User-Agent
+    CONNECTION_FAILURE_SCORE # 접속 실패 시 추가 점수 (+15)
 )
 from app.models import PhaseResult  # Phase 결과 모델
 
@@ -152,17 +153,17 @@ async def track_redirects(url: str) -> Tuple[PhaseResult, str, Optional[str]]:
         
     except httpx.TimeoutException:
         # ============================================
-        # 타임아웃 발생 (서버 응답 없음)
+        # 타임아웃 발생 (서버 응답 없음) = 수상한 사이트 가능성
         # ============================================
         logger.warning(f"⏱️ 타임아웃: {url}")
         return (
             PhaseResult(
                 phase="Phase 1: Redirect",
-                score=0,  # 에러시 0점 처리 (명세서 원칙)
-                reasons=["요청 타임아웃 - 단계 건너뜀"],
+                score=CONNECTION_FAILURE_SCORE,  # 0 → 15 (Recall 개선)
+                reasons=[f"접속 타임아웃 - 수상한 사이트 (+{CONNECTION_FAILURE_SCORE})"],
                 should_block=False,
                 skip_remaining=False,
-                metadata={"error": "Timeout"}
+                metadata={"error": "Timeout", "connection_failure": True}
             ),
             url,
             None
@@ -170,17 +171,17 @@ async def track_redirects(url: str) -> Tuple[PhaseResult, str, Optional[str]]:
         
     except Exception as e:
         # ============================================
-        # 기타 예외 (네트워크 오류 등)
+        # 기타 예외 (네트워크 오류 등) = 수상한 사이트 가능성
         # ============================================
         logger.error(f"❌ 리다이렉트 추적 실패 [{url}]: {e}")
         return (
             PhaseResult(
                 phase="Phase 1: Redirect",
-                score=0,
-                reasons=["오류 발생 - 단계 건너뜀"],
+                score=CONNECTION_FAILURE_SCORE,  # 0 → 15 (Recall 개선)
+                reasons=[f"접속 실패 - 수상한 사이트 (+{CONNECTION_FAILURE_SCORE})"],
                 should_block=False,
                 skip_remaining=False,
-                metadata={"error": str(e)}
+                metadata={"error": str(e), "connection_failure": True}
             ),
             url,
             None

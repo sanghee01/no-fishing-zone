@@ -1,0 +1,193 @@
+{
+  "total_tested": 50,
+  "false_negatives_count": 20,
+  "false_negative_rate": 0.4,
+  "score_distribution": {
+    "0-10": 13,
+    "11-19": 7,
+    "20+": 0
+  },
+  "common_keywords": {},
+  "false_negatives": [
+    {
+      "url": "https://m.5157015.com/",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://arthurmarc99.github.io/instagram-test/",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://m.08c5157.com/",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://staemconmumity.sbs/gift",
+      "status": "SAFE",
+      "risk_score": 10,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://anchal-pal.github.io/netflix-clone/",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://approve-pending202.com/U8NMFZ6AT",
+      "status": "SAFE",
+      "risk_score": 15,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://approve-pending202.com/8KTOMZGOV",
+      "status": "SAFE",
+      "risk_score": 15,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://approve-pending202.com/HRQN5UYBY",
+      "status": "SAFE",
+      "risk_score": 15,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://approve-pending202.com/V7Y5F6N4X",
+      "status": "SAFE",
+      "risk_score": 15,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://www.raanulgyqj.yoga/",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://bonoiyoas.sa.com/AllDO.html?eta~3mail@a.b.c0",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://www.kfczlzbjun.yoga/",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "http://nashya52617.anakembok.de.116-193-191-4.cpanel.site/",
+      "status": "SAFE",
+      "risk_score": 10,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "http://a1.wazaf.cc/",
+      "status": "SAFE",
+      "risk_score": 5,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://approve-pending202.com/VB669MBD4",
+      "status": "SAFE",
+      "risk_score": 15,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "http://cn.fluvxq.com/",
+      "status": "SAFE",
+      "risk_score": 5,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://amazon-clone-95e6.vercel.app/",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://approve-pending202.com/WZUK862IN",
+      "status": "SAFE",
+      "risk_score": 15,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://approve-pending202.com/3PEDRNSGP",
+      "status": "SAFE",
+      "risk_score": 15,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    },
+    {
+      "url": "https://roblox.com.kz/games/103754275310547/KRAMPUS-Hunty-Zombie?privateServerLinkCode=99993035362166151822580028247069",
+      "status": "SAFE",
+      "risk_score": 0,
+      "ai_risk_score": 0,
+      "description": "",
+      "keyword": "",
+      "phases": []
+    }
+  ]
+}

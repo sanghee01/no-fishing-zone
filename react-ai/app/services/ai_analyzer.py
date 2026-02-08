@@ -14,11 +14,13 @@ Claude Haiku 4.5를 사용하는 이유:
 3. 충분한 성능 (피싱 패턴 감지에 적합)
 
 점수 체계:
-- AI 위험도(0.0~1.0) × 30 = 최대 +30점(해당 부분 수정됨 )
+- AI 위험도(0.0~1.0) × 55 = 최대 +55점
 
 카테고리:
 - "Negative": 불법 콘텐츠 (도박, 음란물) → Phase 4 건너뛰고 즉시 차단
 - "Common": 일반 서비스 (금융, 쇼핑) → Phase 4에서 사칭 여부 확인
+
+v4 개선: HTML 없을 때 URL-Only AI 분석 Fallback 추가
 """
 
 import json  # JSON 파싱용
@@ -36,7 +38,6 @@ logger = logging.getLogger(__name__)
 # ============================================
 # Claude에게 보내는 시스템 프롬프트 (v3 - 강화된 피싱 탐지)
 # ============================================
-# 이 프롬프트가 AI의 "역할"과 "출력 형식"을 정의합니다
 SYSTEM_PROMPT = """너는 사이버 보안 전문가야. 주어진 웹페이지 텍스트를 분석해서 다음 JSON 형식으로만 응답해.
 
 응답 형식:
@@ -86,7 +87,43 @@ SYSTEM_PROMPT = """너는 사이버 보안 전문가야. 주어진 웹페이지 
 
 반드시 유효한 JSON만 응답하고 다른 텍스트는 포함하지 마."""
 
+# ============================================
+# URL-Only 분석용 시스템 프롬프트 (v4 - Recall 개선)
+# ============================================
+# HTML 콘텐츠 없이 URL만으로 분석할 때 사용
+URL_ONLY_SYSTEM_PROMPT = """너는 사이버 보안 전문가야. 주어진 URL을 분석해서 피싱/스캠 가능성을 평가해.
 
+응답 형식:
+{
+    "keyword": "URL이 사칭하는 것으로 보이는 브랜드명 (없으면 빈 문자열)",
+    "risk_score": 0.0~1.0 사이의 위험도 점수,
+    "category": "Common" 또는 "Negative",
+    "description": "판단 근거"
+}
+
+★★★ URL 기반 고위험 패턴 (반드시 적용) ★★★
+
+1. 개발자 플랫폼에서 브랜드 사칭:
+   - "amazon-clone.vercel.app", "netflix-test.github.io" 등
+   - → risk_score: 0.9 이상
+
+2. 피싱 키워드 포함:
+   - "pending", "approve", "verify", "confirm", "secure", "update", "login", "clone"
+   - → risk_score: 0.7 이상
+
+3. 수상한 TLD:
+   - .xyz, .top, .pw, .icu, .club, .sbs, .yoga 등
+   - → risk_score: 0.5 이상
+
+4. 랜덤 문자열 도메인:
+   - "ab123cd.com", "xyzqwert.xyz" 등 의미없는 문자열
+   - → risk_score: 0.6 이상
+
+5. 브랜드명 + 수상한 도메인:
+   - "apple.secure-login.xyz", "paypal.verify.top" 등
+   - → risk_score: 0.8 이상
+
+반드시 유효한 JSON만 응답하고 다른 텍스트는 포함하지 마."""
 
 async def analyze_with_ai(html_content: Optional[str]) -> PhaseResult:
     """
@@ -254,3 +291,101 @@ async def analyze_with_ai(html_content: Optional[str]) -> PhaseResult:
             skip_remaining=False,
             metadata={"error": str(e)}
         )
+
+
+async def analyze_url_only(url: str) -> PhaseResult:
+    """
+    URL만으로 AI 분석을 수행합니다 (HTML 없을 때 Fallback).
+    
+    v4 개선: HTML 콘텐츠를 가져올 수 없는 경우에도 URL 패턴만으로
+    피싱 가능성을 평가하여 Recall을 개선합니다.
+    
+    Args:
+        url: 분석할 URL
+        
+    Returns:
+        PhaseResult: URL 기반 AI 분석 결과
+    """
+    if not ANTHROPIC_API_KEY:
+        return PhaseResult(
+            phase="Phase 3: URL-Only AI Analysis",
+            score=0,
+            reasons=["API 키 미설정 - URL 분석 건너뜀"],
+            should_block=False,
+            skip_remaining=False,
+            metadata={"error": "API key missing"}
+        )
+    
+    try:
+        # Claude API 클라이언트 생성
+        client = Anthropic(api_key=ANTHROPIC_API_KEY)
+        
+        # URL 분석 요청
+        message = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=500,
+            system=URL_ONLY_SYSTEM_PROMPT,
+            messages=[
+                {"role": "user", "content": f"다음 URL을 분석해줘: {url}"}
+            ]
+        )
+        
+        # 응답 텍스트 추출
+        response_text = message.content[0].text.strip()
+        logger.debug(f"🔍 URL-Only AI 응답: {response_text[:200]}...")
+        
+        # JSON 파싱
+        analysis = AIAnalysisResult(**json.loads(response_text))
+        
+        # 점수 계산 (AI_SCORE_MULTIPLIER의 70%만 적용 - URL만으로는 덜 확실)
+        url_multiplier = int(AI_SCORE_MULTIPLIER * 0.7)  # 55 * 0.7 = 38.5 → 38
+        score = int(analysis.risk_score * url_multiplier)
+        
+        reasons = [f"URL-Only AI 분석: 위험도 {analysis.risk_score:.2f} (+{score})"]
+        
+        if analysis.keyword:
+            reasons.append(f"감지된 브랜드: {analysis.keyword}")
+        
+        if analysis.description:
+            reasons.append(f"AI 분석: {analysis.description[:100]}")
+        
+        logger.info(f"✅ URL-Only AI 분석 완료: {url[:50]} → {score}점")
+        
+        return PhaseResult(
+            phase="Phase 3: URL-Only AI Analysis",
+            score=score,
+            reasons=reasons,
+            should_block=False,
+            skip_remaining=False,
+            metadata={
+                "keyword": analysis.keyword,
+                "risk_score": analysis.risk_score,
+                "category": analysis.category,
+                "description": analysis.description,
+                "model": CLAUDE_MODEL,
+                "url_only": True
+            }
+        )
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ URL-Only AI 응답 JSON 파싱 실패: {e}")
+        return PhaseResult(
+            phase="Phase 3: URL-Only AI Analysis",
+            score=0,
+            reasons=["URL 분석 응답 파싱 실패"],
+            should_block=False,
+            skip_remaining=False,
+            metadata={"error": f"JSON parse error: {str(e)}"}
+        )
+        
+    except Exception as e:
+        logger.error(f"❌ URL-Only AI 분석 실패: {e}")
+        return PhaseResult(
+            phase="Phase 3: URL-Only AI Analysis",
+            score=0,
+            reasons=["URL 분석 오류"],
+            should_block=False,
+            skip_remaining=False,
+            metadata={"error": str(e)}
+        )
+

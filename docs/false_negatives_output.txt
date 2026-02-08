@@ -1,0 +1,167 @@
+================================================================================
+🔍 미탐지 URL 상세 분석 (악성 → SAFE)
+================================================================================
+  진행: 10/50, 미탐지: 5개
+  진행: 20/50, 미탐지: 10개
+  진행: 30/50, 미탐지: 13개
+  진행: 40/50, 미탐지: 15개
+  진행: 50/50, 미탐지: 20개
+
+================================================================================
+❌ 미탐지 URL 상세 분석: 20/50개
+================================================================================
+
+--- [1/20] 미탐지 ---
+URL: https://m.5157015.com/
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [2/20] 미탐지 ---
+URL: https://arthurmarc99.github.io/instagram-test/
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [3/20] 미탐지 ---
+URL: https://m.08c5157.com/
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [4/20] 미탐지 ---
+URL: https://staemconmumity.sbs/gift
+위험 점수: 10
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [5/20] 미탐지 ---
+URL: https://anchal-pal.github.io/netflix-clone/
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [6/20] 미탐지 ---
+URL: https://approve-pending202.com/U8NMFZ6AT
+위험 점수: 15
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [7/20] 미탐지 ---
+URL: https://approve-pending202.com/8KTOMZGOV
+위험 점수: 15
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [8/20] 미탐지 ---
+URL: https://approve-pending202.com/HRQN5UYBY
+위험 점수: 15
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [9/20] 미탐지 ---
+URL: https://approve-pending202.com/V7Y5F6N4X
+위험 점수: 15
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [10/20] 미탐지 ---
+URL: https://www.raanulgyqj.yoga/
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [11/20] 미탐지 ---
+URL: https://bonoiyoas.sa.com/AllDO.html?eta~3mail@a.b.c0
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [12/20] 미탐지 ---
+URL: https://www.kfczlzbjun.yoga/
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [13/20] 미탐지 ---
+URL: http://nashya52617.anakembok.de.116-193-191-4.cpanel.site/
+위험 점수: 10
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [14/20] 미탐지 ---
+URL: http://a1.wazaf.cc/
+위험 점수: 5
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [15/20] 미탐지 ---
+URL: https://approve-pending202.com/VB669MBD4
+위험 점수: 15
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [16/20] 미탐지 ---
+URL: http://cn.fluvxq.com/
+위험 점수: 5
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [17/20] 미탐지 ---
+URL: https://amazon-clone-95e6.vercel.app/
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [18/20] 미탐지 ---
+URL: https://approve-pending202.com/WZUK862IN
+위험 점수: 15
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [19/20] 미탐지 ---
+URL: https://approve-pending202.com/3PEDRNSGP
+위험 점수: 15
+AI 위험도: 0
+키워드: 
+Description: 
+
+--- [20/20] 미탐지 ---
+URL: https://roblox.com.kz/games/103754275310547/KRAMPUS-Hunty-Zombie?privateServerLinkCode=99993035362166151822580028247069
+위험 점수: 0
+AI 위험도: 0
+키워드: 
+Description: 
+
+================================================================================
+📊 미탐지 패턴 분석
+================================================================================
+
+[1] 위험 점수 분포:
+  0-10점: 13개
+  11-19점: 7개
+  20+점: 0개
+
+[2] 자주 등장하는 키워드 (Top 10):
+
+================================================================================
+📁 결과 저장: /app/false_negatives_analysis.json
+================================================================================
