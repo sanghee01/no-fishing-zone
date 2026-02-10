@@ -62,7 +62,7 @@
 
 ### Front
 
-| <img src="./docs/images/logo/nextjs.png" width="50px"> | <img src="./docs/images/logo/react.webp" width="50px"> | <img src="./docs/images/logo/devup.webp" width="50px"> | <img src="./docs/images/logo/ts.webp" width="50px"> |
+| <img src="./docs/images/logo/next-js.png" width="50px"> | <img src="./docs/images/logo/react.webp" width="50px"> | <img src="./docs/images/logo/devup.webp" width="50px"> | <img src="./docs/images/logo/ts.webp" width="50px"> |
 | :-----------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------: | :-------------------------------------------------: |
 |             [Next.js](https://nextjs.org/)              |             [React.js](https://react.dev/)             |           [Devup UI](https://devup-ui.com/)            |    [TypeScript](https://www.typescriptlang.org/)    |
 
