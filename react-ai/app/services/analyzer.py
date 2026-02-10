@@ -74,6 +74,9 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
     - 오류로 인해 전체 분석이 중단되지 않음
     """
     url = request.url
+    # URL 정규화: 끝의 슬래시 제거 (중복 캐싱 방지)
+    # 예: https://drive.google.com/ → https://drive.google.com
+    url = url.rstrip("/")
     total_score = 0  # 총 위험 점수
     all_reasons = []  # 모든 점수 사유
     category = ""  # AI가 판정한 카테고리
@@ -130,7 +133,7 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
             )
     except Exception as e:
         logger.error(f"❌ [{request.request_id}] Phase 1 오류: {e}")
-        all_reasons.append("Phase 1: 오류 발생 - 건너뜀")
+        all_reasons.append(f"Phase 1: 오류 발생 ({str(e)}) - 건너뜀")
     
     # ============================================
     # Phase 2: 도메인 메타데이터 분석
@@ -142,10 +145,10 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
         all_reasons.extend(phase2_result.reasons)
     except Exception as e:
         logger.error(f"❌ [{request.request_id}] Phase 2 오류: {e}")
-        all_reasons.append("Phase 2: 오류 발생 - 건너뜀")
+        all_reasons.append(f"Phase 2: 오류 발생 ({str(e)}) - 건너뜀")
     
     # ============================================
-    # Phase 3: Claude AI 시맨틱 분석 (v4 - URL-Only Fallback 추가)
+    # Phase 3: AI 분석 (v4 - URL-Only Fallback 추가)
     # ============================================
     # HTML 내용을 AI가 분석하여 브랜드/위험도 추출
     # v4 개선: HTML 없으면 URL만으로 분석 (Recall 개선)
@@ -178,7 +181,7 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
             )
     except Exception as e:
         logger.error(f"❌ [{request.request_id}] Phase 3 오류: {e}")
-        all_reasons.append("Phase 3: 오류 발생 - 건너뜀")
+        all_reasons.append(f"Phase 3: 오류 발생 ({str(e)}) - 건너뜀")
     
     # ============================================
     # Phase 4: 검색 엔진 교차 검증
@@ -191,7 +194,7 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
             all_reasons.extend(phase4_result.reasons)
         except Exception as e:
             logger.error(f"❌ [{request.request_id}] Phase 4 오류: {e}")
-            all_reasons.append("Phase 4: 오류 발생 - 건너뜀")
+            all_reasons.append(f"Phase 4: 오류 발생 ({str(e)}) - 건너뜀")
     
     # ============================================
     # 최종 판정
