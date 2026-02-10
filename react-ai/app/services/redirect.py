@@ -67,7 +67,15 @@ async def track_redirects(url: str) -> Tuple[PhaseResult, str, Optional[str]]:
             follow_redirects=True,  # 리다이렉트 자동 따라가기
             max_redirects=MAX_REDIRECT_HOPS + 1,  # 최대 허용 + 1 (초과 감지용)
             timeout=REQUEST_TIMEOUT,  # 타임아웃 설정
-            headers={"User-Agent": USER_AGENT}  # 브라우저로 위장
+            verify=False,  # SSL 인증서 검증 무시 (자체 서명 등 접속 허용)
+            headers={
+                "User-Agent": USER_AGENT,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1"
+            }  # 브라우저로 위장 (헤더 단순화하여 호환성 확보)
         ) as client:
             # GET 요청 보내기
             response = await client.get(url)

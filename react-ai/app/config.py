@@ -45,7 +45,7 @@ SERVER_PORT = int(os.getenv("SERVER_PORT", "8000"))  # 기본 포트 8000
 # 15점 미만 = SAFE (안전)
 # 
 # ★ v4: WARNING_THRESHOLD 20 → 15로 낮춰서 미탐지 추가 감소
-BLOCK_THRESHOLD = int(os.getenv("BLOCK_THRESHOLD", "70"))
+BLOCK_THRESHOLD = int(os.getenv("BLOCK_THRESHOLD", "65"))
 WARNING_THRESHOLD = int(os.getenv("WARNING_THRESHOLD", "15"))  # 20 → 15 (Recall 개선)
 
 # ============================================
