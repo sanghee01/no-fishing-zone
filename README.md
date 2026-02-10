@@ -1,344 +1,150 @@
-# Aegis Link
+# 낚시금지구역(No Fishing Zone)
 
-**URL 평판 관리 및 스캠 탐지 시스템** - MSA 기반 보안 솔루션
+> AI 기반 실시간 피싱/스캠 탐지 솔루션 for 국군 장병
 
-사용자를 피싱, 도박, 스캠 사이트로부터 보호하는 지능형 URL 분석 플랫폼입니다.
+## 개요
+
+보안 사고에서 가장 중요한 것은 **사고가 일어나기 전에 막는 것**입니다. 이미 유출된 정보는 되돌릴 수 없기 때문입니다.
+
+낚시금지구역은 장병이 링크를 클릭하는 순간, AI가 자동으로 해당 사이트를 분석하여 위험을 접속 전에 차단하는 사전 예방 시스템입니다.
+
+## 문제 정의
+
+보안 위협이라고 하면 시스템 해킹이나 변조 같은 기술적 공격을 떠올리기 쉽지만, 실제로 가장 많은 피해를 일으키는 것은 피싱이나 스캠처럼 사람을 속이는 공격입니다.
+
+### 현황
+
+- **국내 스미싱 발생**: 4,396건 (2024년 기준, 4년간 3.3배 증가)
+- **국군 대상 외부 공격**: 매년 50% 증가
+- **장병 연간 피해액**: 60~70억원 (스미싱 + 환전사기)
+
+장병들은 일과 후 휴대전화로 다양한 서비스를 이용합니다. 수많은 링크를 직접 판단하는 것은 현실적으로 어렵고, 한 번 속는 순간 유출되는 것은 국가 안보와 직결된 정보일 수 있습니다.
+
+## 솔루션
+
+### 핵심 아이디어
+
+클릭 한 번의 실수를 접속 전에 차단합니다.
+
+장병이 링크를 클릭하는 순간, 실제 사이트에 접속하기 전에 AI가 먼저 해당 페이지를 방문하여 분석합니다. 위험한 사이트라면 경고를 표시하고, 안전하다면 바로 접속할 수 있게 합니다. 판단의 부담을 사용자에게 넘기지 않고, AI가 명확한 결과를 제공합니다.
+
+### 작동 방식
+
+```
+링크 클릭 → 자동 인터셉트 → DB 조회 → DB에 없다면 실시간 AI 분석 → 판정
+```
+
+1. **자동 감지**: 사용자가 평소처럼 링크를 클릭하면, 앱이 이를 자동으로 인터셉트합니다
+2. **즉시 분석**: 백엔드 서버가 해당 URL을 받아 DB를 먼저 조회합니다
+3. **AI 판정**: DB에 없는 경우 React AI가 실시간으로 사이트를 분석하고 위험도를 평가합니다
+4. **결과 표시**: 분석 결과(안전/경고/위험)를 사용자에게 보여줍니다
+
+### 핵심 기능
+
+**듀얼 AI 시스템**
+
+- **React AI (실시간 분석 엔진)**: URL 유입 즉시 페이지의 맥락과 구조를 이해하여 3초 내에 위험 여부를 판별합니다.
+- **Search AI (자율 수집 봇)**: 검색엔진처럼 인터넷을 스스로 돌아다니며, CertStream 실시간 모니터링을 통해 신규 피싱 사이트를 선제적으로 발견하고 DB를 자동 업데이트합니다.
+
+**시스템 시너지**
+
+- 데이터베이스를 업데이트하면, React AI의 사용 빈도가 줄어듭니다.  
+  즉, 데이터가 누적될수록 실시간 분석 과정이 간소화되어, 시스템을 이용할수록 전체적인 응답 속도가 더욱 빨라지는 선순환 구조를 갖추고 있습니다.
+
+**기술적 강점**
+
+- **효율적인 아키텍처**: 독립 워커 구조를 채택하여 일부 수집 지점이 차단되더라도 전체 시스템은 중단 없이 가용성을 유지합니다.
+- **자원 최적화**: Rust 기반 서버를 통해 메모리 안전성을 확보하고, 저자원 환경에서도 높은 처리 성능을 발휘하도록 설계했습니다.
+- **정교한 탐지 기술**: 단순 필터링이 아닌 HTML 정제 분석 및 금융/쇼핑 공식 도메인 대조를 통해 사칭 사이트를 검증합니다.
+- **사용자 경험(UX) 고려**: 하이브리드 렌더링(SSR+CSR)과 SSE(Server Sent Events)를 활용하여 빠른 응답 속도와 실시간 분석을 동시에 제공합니다.
+
+## 기술 스택
+
+### Front
+
+| <img src="./docs/images/logo/next-js.png" width="50px"> | <img src="./docs/images/logo/react.webp" width="50px"> | <img src="./docs/images/logo/devup.webp" width="50px"> | <img src="./docs/images/logo/ts.webp" width="50px"> |
+| :-----------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------: | :-------------------------------------------------: |
+|             [Next.js](https://nextjs.org/)              |             [React.js](https://react.dev/)             |           [Devup UI](https://devup-ui.com/)            |    [TypeScript](https://www.typescriptlang.org/)    |
+
+### Server
+
+| <img src="./docs/images/logo/rust.webp" width="50px"> | <img src="./docs/images/logo/seaorm.webp" width="50px"> | <img src="./docs/images/logo/vespera.webp" width="50px"> | <img src="./docs/images/logo/vespera.webp" width="50px"> |
+| :---------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: | :------------------------------------------------------: |
+|          [Rust](https://www.rust-lang.org/)           |        [Sea ORM](https://www.sea-ql.org/SeaORM/)        |    [Vespera](https://github.com/dev-five-git/vespera)    | [Vespertide](https://github.com/dev-five-git/vespertide) |
+
+### Android
+
+| <img src="./docs/images/logo/flutter.webp" width="50px"> | <img src="./docs/images/logo/dart.webp" width="50px"> | <img src="./docs/images/logo/kotline.webp" width="50px"> |
+| :------------------------------------------------------: | :---------------------------------------------------: | :------------------------------------------------------: |
+|             [Flutter](https://flutter.dev/)              |               [Dart](https://dart.dev/)               |            [Kotline](https://kotlinlang.org/)            |
+
+## AI
+
+| <img src="./docs/images/logo/python.webp" width="50px"> | <img src="./docs/images/logo/claude.webp" width="50px"> | <img src="./docs/images/logo/fastapi.webp" width="50px"> | <img src="./docs/images/logo/uvicorn.webp" width="50px"> |
+| :-----------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: | :------------------------------------------------------: |
+|            [Python](https://www.python.org/)            |         [Anthropic](https://www.anthropic.com/)         |         [Fastapi](https://fastapi.tiangolo.com/)         |           [Uvicorn](https://www.uvicorn.org/)            |
+
+## 아키텍처
+
+### 전체 구조
+
+<img src="./docs/images/readme/architecture.png" width="100%">
+
+### 시스템 구성
+
+| Layer        | Technology          | Purpose                                | 주요 기능                         |
+| ------------ | ------------------- | -------------------------------------- | --------------------------------- |
+| **Mobile**   | Flutter             | URL 인터셉트, 사용자 인터페이스        | 링크 클릭 감지, 검증 결과 표시    |
+| **Backend**  | Rust (Axum)         | 고성능 API 서버, 저자원 최적화         | API 라우팅, DB 연동, SSE 스트리밍 |
+| **AI**       | Python (Claude API) | 실시간 분석, 자율 크롤링               | 사이트 분석, 위험도 평가          |
+| **Frontend** | Next.js             | 분석 결과 페이지                       | SSR/CSR, 실시간 분석 UI           |
+| **Database** | PostgreSQL          | 위협/안전 정보 저장                    | URL 평판 캐싱, 분석 이력 관리     |
+| **Infra**    | Docker, Nginx       | 컨테이너 오케스트레이션, 리버스 프록시 | 서비스 격리, 트래픽 라우팅        |
+
+### 데이터 흐름
+
+**시나리오 1 - 캐시 히트** (저장된 URL)
+
+1. 사용자 링크 클릭 → 2. URL 인터셉트 → 3. DB 조회 성공 → 4. 즉시 결과 반환
+
+**시나리오 2 - 신규 분석** (처음 보는 URL)
+
+1. 사용자 링크 클릭 → 2. URL 인터셉트 → 3. DB 조회 실패 → 4. React AI 실시간 분석 → 5. 분석 결과 DB에 저장 및 결과 반환
+
+<img src="./docs/images/readme/sequence.png" width="100%">
 
 ---
 
-## 🏗️ 프로젝트 구조
-
-```
-aegis-link/
-├── 📄 docker-compose.yml     # 전체 서비스 오케스트레이션
-├── 📄 .env                   # 환경변수 (Git 제외)
-├── 📄 AGENT.md               # AI 에이전트 행동 지침
-├── 📄 README.md              # 이 파일
-│
-├── 📁 .agent/                # AI 에이전트 설정
-│   ├── rules/                # 코딩 규칙 (docker, vespera, vespertide)
-│   ├── skills/               # 기술 가이드
-│   └── workflows/            # 자동화 워크플로우
-│
-├── 📁 backend/               # 🦀 Rust API 서버 (메인 서버)
-│   ├── src/
-│   │   ├── main.rs           # 엔트리포인트
-│   │   ├── routes/           # API 라우트 핸들러
-│   │   └── models/           # SeaORM 모델
-│   ├── migrations/           # DB 마이그레이션
-│   ├── Dockerfile
-│   └── Cargo.toml
-│
-├── 📁 frontend/              # ⚛️ Next.js 프론트엔드
-│   ├── app/                  # App Router 페이지
-│   ├── components/           # React 컴포넌트
-│   ├── lib/                  # 유틸리티
-│   ├── Dockerfile
-│   └── package.json
-│
-├── 📁 react-ai/              # 🤖 Python AI 분석 서버
-│   ├── app/
-│   │   ├── main.py           # FastAPI 엔트리포인트
-│   │   ├── services/         # 분석 로직 (Claude AI 연동)
-│   │   └── models.py         # Pydantic 스키마
-│   ├── Dockerfile
-│   └── pyproject.toml
-│
-└── 📁 search-ai/             # 🕷️ 지능형 도메인 홉 크롤러
-    ├── main.py               # 엔트리포인트
-    ├── crawler/              # 크롤링 엔진
-    ├── api_client/           # API 통신 클라이언트
-    ├── collectors/           # 정적 데이터 수집
-    ├── utils/                # 유틸리티
-    ├── seeds/                # 시드 데이터 (엔트리포인트, 키워드, 블랙리스트)
-    │   ├── entry_points.txt  # 크롤링 시작점 URL
-    │   ├── keywords.txt      # 우선순위 키워드
-    │   ├── pished_tank.json  # PhishTank 블랙리스트 (28MB)
-    │   └── 1000000white.csv  # Tranco 화이트리스트 (21MB)
-    ├── logs/                 # 크롤링 로그
-    ├── Dockerfile
-    └── pyproject.toml
-```
-
----
-
-## 🔄 아키텍처 및 데이터 흐름
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                            Aegis Link 시스템                             │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌──────────────┐                              ┌──────────────┐        │
-│  │   Frontend   │ ◄──── HTTP :3001 ────────►  │    User      │        │
-│  │  (Next.js)   │                              │   Browser    │        │
-│  └──────┬───────┘                              └──────────────┘        │
-│         │                                                               │
-│         │ HTTP :8000                                                    │
-│         ▼                                                               │
-│  ┌──────────────┐         ┌──────────────┐         ┌──────────────┐   │
-│  │   Backend    │ ◄─────► │   react-ai   │ ◄─────► │  Claude AI   │   │
-│  │ (Rust/Axum)  │  :8001  │   (FastAPI)  │   API   │   (LLM)      │   │
-│  └──────┬───────┘         └──────────────┘         └──────────────┘   │
-│         │                         ▲                                    │
-│         │ SeaORM                  │ HTTP :8001                         │
-│         ▼                         │                                    │
-│  ┌──────────────┐         ┌──────┴───────┐                            │
-│  │  PostgreSQL  │ ◄─────  │  search-ai   │  (크롤러)                   │
-│  │    (DB)      │  :8000  │  (Python)    │                            │
-│  └──────────────┘         └──────────────┘                            │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🗄️ 데이터베이스
-
-### 위치
-
-- **호스트**: Docker 컨테이너 `aegis-link-postgres-1`
-- **외부 포트**: `localhost:5432`
-- **내부 포트**: `postgres:5432` (Docker 네트워크)
-
-### 접속 정보
-
-| 항목     | 값                           |
-| -------- | ---------------------------- |
-| Database | `aegis_link_db`              |
-| User     | `aegis_user`                 |
-| Password | `.env`의 `POSTGRES_PASSWORD` |
-
-### 주요 테이블
-
-```sql
--- URL 평판 정보 테이블
-CREATE TABLE url_reputations (
-    url TEXT PRIMARY KEY,           -- 정규화된 URL
-    description TEXT,               -- 설명/분석 결과
-    score INTEGER NOT NULL,         -- 위험 점수 (0-100)
-    status VARCHAR(10) NOT NULL     -- 'SAFE', 'WARNING', 'BLOCK'
-);
-```
-
-### 직접 접속 명령어
+## 프로젝트 구조
 
 ```bash
-# PostgreSQL CLI 접속
-docker exec -it aegis-link-postgres-1 psql -U aegis_user -d aegis_link_db
-
-# 데이터 조회
-docker exec -it aegis-link-postgres-1 psql -U aegis_user -d aegis_link_db -c "SELECT COUNT(*) FROM url_reputations;"
-
-# 수동 데이터 삽입
-docker exec -it aegis-link-postgres-1 psql -U aegis_user -d aegis_link_db -c \
-  "INSERT INTO url_reputations (url, description, score, status) VALUES ('https://example.com', '테스트', 100, 'SAFE');"
+├── app/                # Flutter 모바일 앱 (URL 인터셉트, 사용자 인터페이스)
+├── backend/            # Rust API 서버 (비즈니스 로직, DB 연동)
+├── frontend/           # Next.js 웹 (분석 결과 페이지)
+├── react-ai/           # 실시간 AI 분석 엔진 (Python, FastAPI, Claude API)
+├── search-ai/          # 자율 위협 수집 크롤러 (Python, Playwright)
+├── nginx/              # 리버스 프록시 (트래픽 라우팅)
+└── docker-compose.yml  # 인프라 오케스트레이션
 ```
 
----
+## 데모
 
-## 🚀 빠른 시작
+### 발표 영상
 
-### 사전 준비
+[🎥 발표 영상](https://youtu.be/my0cum_Loy8?si=JH4iWuowXXf8_w1t)
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) 설치 및 실행
-- [Node.js](https://nodejs.org/) (v18 이상) - 로컬 개발 시
+### 주요 화면
 
-### 1. 환경변수 설정
+|                                    분석 화면                                     |                                   위험 화면                                   |                                   경고 화면                                   |                                 안전 화면                                  |                                  미존재 화면                                   |
+| :------------------------------------------------------------------------------: | :---------------------------------------------------------------------------: | :---------------------------------------------------------------------------: | :------------------------------------------------------------------------: | :----------------------------------------------------------------------------: |
+| <img src="./docs/images/readme/collectingPage.png" width="180px" height="395px"> | <img src="./docs/images/readme/warningPage.png" width="180px" height="395px"> | <img src="./docs/images/readme/cautionPage.png" width="180px" height="395px"> | <img src="./docs/images/readme/safePage.png" width="180px" height="395px"> | <img src="./docs/images/readme/notFoundPage.png" width="180px" height="395px"> |
 
-```bash
-cp .env.example .env
-# .env 파일을 열어서 설정:
-# - POSTGRES_PASSWORD=your_password
-# - ANTHROPIC_API_KEY=your_claude_api_key
-```
+## 팀 역할
 
-### 2. 전체 서비스 실행
-
-```bash
-# 빌드 및 실행
-docker compose up -d --build
-
-# 상태 확인
-docker compose ps
-
-# 로그 확인 (전체)
-docker compose logs -f
-
-# 특정 서비스 로그
-docker compose logs -f search-ai
-```
-
-### 3. 접속 주소
-
-| 서비스       | URL                               | 설명                           |
-| ------------ | --------------------------------- | ------------------------------ |
-| Frontend     | http://localhost                  | 사용자 인터페이스 (Nginx 경유) |
-| Backend API  | http://localhost/url-reputations/ | REST API (Nginx 경유)          |
-| Health Check | http://localhost/health/          | 서비스 상태 확인               |
-
----
-
-## 🚀 팀원용 빠른 시작 (5분 설치)
-
-### 사전 준비
-
-1. **Docker Desktop 설치**
-   - [다운로드 링크](https://www.docker.com/products/docker-desktop/)
-   - 설치 후 Docker Desktop 실행 확인
-
-2. **환경 변수 파일 준비**
-   - 팀 리더에게 `.env` 파일 요청
-   - 또는 `.env.example`을 복사하여 직접 설정
-
----
-
-### 설치 단계
-
-#### Step 1: 저장소 클론
-
-```bash
-# 1. 원하는 디렉토리로 이동
-cd ~/Documents
-
-# 2. 저장소 클론
-git clone https://github.com/your-org/aegis-link.git
-cd aegis-link
-```
-
-#### Step 2: 환경 변수 설정
-
-**옵션 A: 팀 리더에게 받은 .env 파일 사용**
-
-```bash
-# .env 파일을 프로젝트 루트에 복사
-# (파일 탐색기에서 드래그 앤 드롭)
-```
-
-**옵션 B: 직접 설정**
-
-```bash
-# 1. 템플릿 복사
-cp .env.example .env
-
-# 2. 에디터로 열기
-nano .env  # 또는 code .env (VS Code)
-
-# 3. 다음 값 설정
-# POSTGRES_PASSWORD=your_password
-# ANTHROPIC_API_KEY=sk-ant-api03-XXXXXXXX  (Anthropic Console에서 발급)
-# NEXT_PUBLIC_API_BASE_URL=http://localhost/
-```
-
-#### Step 3: 배포 스크립트 실행
-
-```bash
-# 배포 실행
-./deploy.sh
-```
-
-**출력 예시**:
-
-```
-╔═══════════════════════════════════════╗
-║   Aegis-Link 배포 스크립트 v1.0      ║
-╚═══════════════════════════════════════╝
-
-[INFO] 환경 변수 파일 확인 중...
-[INFO] 필수 환경 변수 확인 중...
-[INFO] 보안 설정 적용 중...
-[INFO] Docker 상태 확인 중...
-[INFO] Docker 이미지 빌드 중... (최대 5분 소요)
-...
-[INFO] 서비스가 정상적으로 시작되었습니다!
-
-╔═══════════════════════════════════════╗
-║        배포 완료!                     ║
-╚═══════════════════════════════════════╝
-
-[INFO] 로컬 접속 주소: http://localhost
-```
-
-#### Step 4: 동작 확인
-
-```bash
-# 1. 브라우저에서 접속
-open http://localhost
-
-# 2. URL 분석 테스트
-# - URL 입력창에 "https://google.com" 입력
-# - 분석 시작 버튼 클릭
-# - 실시간 분석 진행 상황 확인
-```
-
----
-
-### 외부 접속 (선택 사항)
-
-팀원과 공유하거나 외부에서 테스트하려면:
-
-```bash
-# 1. cloudflared 설치
-brew install cloudflare/cloudflare/cloudflared
-
-# 2. Tunnel 실행
-cloudflared tunnel --url http://localhost:80
-
-# 3. 출력된 URL 공유
-# 예: https://winter-cloud-1234.trycloudflare.com
-```
-
-**주의**: Tunnel 실행 중에는 전 세계 누구나 접속 가능하므로, 테스트 완료 후 `Ctrl+C`로 종료하세요.
-
----
-
-## 🔧 서비스 포트
-
-| 서비스    | 포트 | 설명                           | Docker 서비스명 |
-| --------- | ---- | ------------------------------ | --------------- |
-| backend   | 8000 | Rust API 서버                  | `api`           |
-| react-ai  | 8001 | Python AI 분석 서버            | `ai`            |
-| frontend  | 3001 | Next.js 프론트엔드             | `frontend`      |
-| postgres  | 5432 | PostgreSQL 데이터베이스        | `postgres`      |
-| search-ai | -    | 크롤러 (포트 없음, 백그라운드) | `search-ai`     |
-
----
-
-## 📝 기술 스택
-
-| 레이어          | 기술                                      |
-| --------------- | ----------------------------------------- |
-| **Backend**     | Rust, Axum, SeaORM, Vespera, Tower-HTTP   |
-| **Frontend**    | Next.js 16 (App Router), TypeScript       |
-| **AI Analysis** | Python, FastAPI, Claude API (Anthropic)   |
-| **Crawler**     | Python, httpx, BeautifulSoup4, tldextract |
-| **Database**    | PostgreSQL 16                             |
-| **DevOps**      | Docker, Docker Compose                    |
-
----
-
-## 💻 개발 가이드
-
-### 백엔드 (Rust)
-
-- **CORS 설정**: `tower-http`를 이용한 Permissive CORS
-- **API 로그**: `println!`을 통해 터미널에서 실시간 확인
-- **DB 마이그레이션**: 서버 시작 시 자동 실행
-- **Rust Nightly** 환경에서 빌드
-
-### 프론트엔드 (Next.js)
-
-- **API 연동**: `@devup-api/fetch`로 타입 안전한 API 호출
-- **예외 처리**: 404 응답 시 안내 UI 표시
-
-### Search-AI (크롤러)
-
-- **정적 데이터**: PhishTank, Tranco 리스트 자동 로드
-- **동적 크롤링**: 도메인 홉 전략으로 차단 회피
-- **Self-Feeding**: 큐가 비면 DB에서 미분석 URL 자동 주입
-
----
-
-## 📄 라이선스
-
-MIT
+|                                          프로필                                           |                      이름                       |        역할         |                담당 영역                |
+| :---------------------------------------------------------------------------------------: | :---------------------------------------------: | :-----------------: | :-------------------------------------: |
+| <img src="https://avatars.githubusercontent.com/u/80993302?v=4" width="80" height="80"/>  |  [이상희(팀장)](https://github.com/sanghee01)   | Full-stack Engineer |     Frontend, Backend, 인프라 구축      |
+| <img src="https://avatars.githubusercontent.com/u/202944707?v=4" width="80" height="80"/> | [문건호(팀원)](https://github.com/snoopuppy582) |     AI Engineer     | React AI, Search AI 개발 및 모델 최적화 |
+| <img src="https://avatars.githubusercontent.com/u/49855381?v=4" width="80" height="80"/>  |   [오병희(팀원)](https://github.com/dev07060)   |  Mobile Developer   |   Android 앱 개발, URL 인터셉트 구현    |
+| <img src="https://avatars.githubusercontent.com/u/12480623?v=4" width="80" height="80"/>  |   [오정민(팀원)](https://github.com/owjs3901)   |   Project Manager   |            총괄 및 아키텍터             |
+|           <img src="./docs/images/readme/profile.png" width="80" height="80"/>            |                  오수정(팀원)                   |      Designer       |  서비스 UI 디자인 및 와이어프레임 설계  |
