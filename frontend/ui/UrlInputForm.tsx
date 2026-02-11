@@ -18,6 +18,7 @@ export function UrlInputForm() {
     <VStack w="100%" maxW="600px" gap="24px" as="form" onSubmit={handleSearch}>
       <Input
         autoFocus
+        type="url"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder="https://example.com"
