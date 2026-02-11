@@ -135,7 +135,7 @@ services:
       # - SKIP_STATIC_IMPORT=true
     volumes:
       # seeds 디렉토리 마운트 (읽기 전용)
-      - ./search-ai/seeds:/app/seeds:ro
+      - ./search-ai/seeds:/app/seeds
       # logs 디렉토리 마운트 (영구 저장)
       - ./search-ai/logs:/app/logs
     depends_on:

@@ -161,17 +161,17 @@ async def track_redirects(url: str) -> Tuple[PhaseResult, str, Optional[str]]:
         
     except httpx.TimeoutException:
         # ============================================
-        # 타임아웃 발생 (서버 응답 없음) = 수상한 사이트 가능성
+        # 타임아웃 발생 (서버 응답 없음) = DEAD 가능성
         # ============================================
         logger.warning(f"⏱️ 타임아웃: {url}")
         return (
             PhaseResult(
                 phase="Phase 1: Redirect",
-                score=CONNECTION_FAILURE_SCORE,  # 0 → 15 (Recall 개선)
-                reasons=[f"접속 타임아웃 - 수상한 사이트 (+{CONNECTION_FAILURE_SCORE})"],
+                score=CONNECTION_FAILURE_SCORE,  # 15점 (일단 부여하지만 analyzer에서 DEAD 처리 시 무시됨)
+                reasons=[f"접속 타임아웃 - 서버 응답 없음"],
                 should_block=False,
-                skip_remaining=False,
-                metadata={"error": "Timeout", "connection_failure": True}
+                skip_remaining=True,  # DEAD 처리를 위해 나머지 스킵
+                metadata={"error": "Timeout", "connection_failure": True, "is_dead": True}
             ),
             url,
             None
@@ -179,17 +179,18 @@ async def track_redirects(url: str) -> Tuple[PhaseResult, str, Optional[str]]:
         
     except Exception as e:
         # ============================================
-        # 기타 예외 (네트워크 오류 등) = 수상한 사이트 가능성
+        # 기타 예외 (네트워크 오류 등) = DEAD 가능성
         # ============================================
+        # ConnectError, NameResolutionError 등 포함
         logger.error(f"❌ 리다이렉트 추적 실패 [{url}]: {e}")
         return (
             PhaseResult(
                 phase="Phase 1: Redirect",
-                score=CONNECTION_FAILURE_SCORE,  # 0 → 15 (Recall 개선)
-                reasons=[f"접속 실패 - 수상한 사이트 (+{CONNECTION_FAILURE_SCORE})"],
+                score=CONNECTION_FAILURE_SCORE,
+                reasons=[f"접속 실패 ({str(e)})"],
                 should_block=False,
-                skip_remaining=False,
-                metadata={"error": str(e), "connection_failure": True}
+                skip_remaining=True, # DEAD 처리를 위해 나머지 스킵
+                metadata={"error": str(e), "connection_failure": True, "is_dead": True}
             ),
             url,
             None

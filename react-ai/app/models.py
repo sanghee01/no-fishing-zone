@@ -47,7 +47,8 @@ class AnalyzeResponse(BaseModel):
     # - "SAFE": 안전 (0~29점)
     # - "WARNING": 주의 (30~59점)  
     # - "BLOCK": 차단 (60점 이상)
-    status: Literal["SAFE", "WARNING", "BLOCK"] = Field(..., description="위험 상태")
+    # - "DEAD": 접속 불가 (서버 다운, 도메인 만료 등)
+    status: Literal["SAFE", "WARNING", "BLOCK", "DEAD"] = Field(..., description="위험 상태")
     
     # risk_score: 총 위험 점수 (0점 이상)
     risk_score: int = Field(..., ge=0, description="총 위험 점수")

@@ -134,6 +134,18 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
     except Exception as e:
         logger.error(f"❌ [{request.request_id}] Phase 1 오류: {e}")
         all_reasons.append(f"Phase 1: 오류 발생 ({str(e)}) - 건너뜀")
+        
+    # DEAD 사이트 감지 (Phase 1에서 접속 실패 판정)
+    if phase1_result.metadata.get("is_dead"):
+        logger.info(f"💀 [{request.request_id}] 접속 불가 사이트 감지 - DEAD")
+        return AnalyzeResponse(
+            url=url,
+            status="DEAD",
+            risk_score=0,  # DEAD는 위험 점수 0 처리 (분석 불가)
+            category="Unreachable",
+            keyword="",
+            reasons=["접속 불가 (서버 다운, 도메인 만료 등)"]
+        )
     
     # ============================================
     # Phase 2: 도메인 메타데이터 분석
