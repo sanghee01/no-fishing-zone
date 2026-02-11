@@ -133,6 +133,10 @@
 
 [🎥 발표 영상](https://youtu.be/my0cum_Loy8?si=JH4iWuowXXf8_w1t)
 
+### 시연 화면
+
+<img src="./docs/images/readme/preview.gif" width="220px">
+
 ### 주요 화면
 
 |                                    분석 화면                                     |                                   위험 화면                                   |                                   경고 화면                                   |                                 안전 화면                                  |                                  미존재 화면                                   |
