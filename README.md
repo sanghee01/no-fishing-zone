@@ -68,9 +68,9 @@
 
 ### Server
 
-| <img src="./docs/images/logo/rust.webp" width="50px"> | <img src="./docs/images/logo/seaorm.webp" width="50px"> | <img src="./docs/images/logo/vespera.webp" width="50px"> | <img src="./docs/images/logo/vespera.webp" width="50px"> |
-| :---------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: | :------------------------------------------------------: |
-|          [Rust](https://www.rust-lang.org/)           |        [Sea ORM](https://www.sea-ql.org/SeaORM/)        |    [Vespera](https://github.com/dev-five-git/vespera)    | [Vespertide](https://github.com/dev-five-git/vespertide) |
+| <img src="./docs/images/logo/rust.png" width="50px"> | <img src="./docs/images/logo/seaorm.webp" width="50px"> | <img src="./docs/images/logo/vespera.webp" width="50px"> | <img src="./docs/images/logo/vespera.webp" width="50px"> |
+| :--------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: | :------------------------------------------------------: |
+|          [Rust](https://www.rust-lang.org/)          |        [Sea ORM](https://www.sea-ql.org/SeaORM/)        |    [Vespera](https://github.com/dev-five-git/vespera)    | [Vespertide](https://github.com/dev-five-git/vespertide) |
 
 ### Android
 
@@ -111,7 +111,7 @@
 
 1. 사용자 링크 클릭 → 2. URL 인터셉트 → 3. DB 조회 실패 → 4. React AI 실시간 분석 → 5. 분석 결과 DB에 저장 및 결과 반환
 
-<img src="./docs/images/readme/sequence.png" width="100%">
+<img src="./docs/images/readme/diagram.svg" width="100%">
 
 ---
 
@@ -141,10 +141,10 @@
 
 ## 팀 역할
 
-|                                          프로필                                           |                      이름                       |        역할         |                담당 영역                |
-| :---------------------------------------------------------------------------------------: | :---------------------------------------------: | :-----------------: | :-------------------------------------: |
-| <img src="https://avatars.githubusercontent.com/u/80993302?v=4" width="80" height="80"/>  |  [이상희(팀장)](https://github.com/sanghee01)   | Full-stack Engineer |     Frontend, Backend, 인프라 구축      |
-| <img src="https://avatars.githubusercontent.com/u/202944707?v=4" width="80" height="80"/> | [문건호(팀원)](https://github.com/snoopuppy582) |     AI Engineer     | React AI, Search AI 개발 및 모델 최적화 |
-| <img src="https://avatars.githubusercontent.com/u/49855381?v=4" width="80" height="80"/>  |   [오병희(팀원)](https://github.com/dev07060)   |  Mobile Developer   |   Android 앱 개발, URL 인터셉트 구현    |
-| <img src="https://avatars.githubusercontent.com/u/12480623?v=4" width="80" height="80"/>  |   [오정민(팀원)](https://github.com/owjs3901)   |   Project Manager   |            총괄 및 아키텍터             |
-|           <img src="./docs/images/readme/profile.png" width="80" height="80"/>            |                  오수정(팀원)                   |      Designer       |  서비스 UI 디자인 및 와이어프레임 설계  |
+|                                           프로필                                            |                      이름                       |        역할         |                담당 영역                |
+| :-----------------------------------------------------------------------------------------: | :---------------------------------------------: | :-----------------: | :-------------------------------------: |
+| <img src="https://avatars.githubusercontent.com/u/80993302?v=4" width="100" height="100"/>  |  [이상희(팀장)](https://github.com/sanghee01)   | Full-stack Engineer |     Frontend, Backend, 인프라 구축      |
+| <img src="https://avatars.githubusercontent.com/u/202944707?v=4" width="100" height="100"/> | [문건호(팀원)](https://github.com/snoopuppy582) |     AI Engineer     | React AI, Search AI 개발 및 모델 최적화 |
+| <img src="https://avatars.githubusercontent.com/u/49855381?v=4" width="100" height="100"/>  |   [오병희(팀원)](https://github.com/dev07060)   |  Mobile Developer   |   Android 앱 개발, URL 인터셉트 구현    |
+| <img src="https://avatars.githubusercontent.com/u/12480623?v=4" width="100" height="100"/>  |   [오정민(팀원)](https://github.com/owjs3901)   |   Project Manager   |            총괄 및 아키텍터             |
+|           <img src="./docs/images/readme/profile.png" width="100" height="100"/>            |                  오수정(팀원)                   |      Designer       |  서비스 UI 디자인 및 와이어프레임 설계  |
