@@ -21,3 +21,7 @@ postgres_data/
 
 # 로그 파일
 *.log
+
+# 우분투 환경 파일
+cloudflared.deb
+nginx.conf
