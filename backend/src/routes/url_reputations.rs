@@ -375,8 +375,17 @@ pub async fn analyze_stream(
                                 ))
                             } else {
                                 // 파싱 실패
+                                let event = ProgressEvent {
+                                    step: 2,
+                                    status: "error".to_string(),
+                                    result: None,
+                                    done: true,
+                                    error_code: Some("AI_RESPONSE_PARSE_ERROR".to_string()),
+                                    error_message: Some("AI 응답 형식이 올바르지 않습니다.".to_string()),
+                                    retry_after: Some(60),
+                                };
                                 Some((
-                                    Ok::<_, Infallible>(Event::default().json_data(&serde_json::json!({"error": "AI response parse failed"})).unwrap()),
+                                    Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                                     AnalyzeState::Done,
                                 ))
                             }
@@ -384,8 +393,17 @@ pub async fn analyze_stream(
                         _ => {
                             // AI 호출 실패
                             println!("❌ AI Server request failed. Result: {:?}", ai_result);
+                            let event = ProgressEvent {
+                                step: 2,
+                                status: "error".to_string(),
+                                result: None,
+                                done: true,
+                                error_code: Some("AI_SERVER_ERROR".to_string()),
+                                error_message: Some("AI 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.".to_string()),
+                                retry_after: Some(30),
+                            };
                             Some((
-                                Ok::<_, Infallible>(Event::default().json_data(&serde_json::json!({"error": "AI server error"})).unwrap()),
+                                Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
                                 AnalyzeState::Done,
                             ))
                         }
