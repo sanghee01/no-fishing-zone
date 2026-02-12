@@ -187,23 +187,92 @@ async def analyze_with_ai(html_content: Optional[str]) -> PhaseResult:
             )
         
         # ============================================
-        # Claude API 호출
+        # Claude API 호출 (에러 핸들링 추가)
         # ============================================
         # Anthropic 클라이언트 생성 (API 키 사용)
         client = Anthropic(api_key=ANTHROPIC_API_KEY)
         
-        # 메시지 생성 요청
-        message = client.messages.create(
-            model=CLAUDE_MODEL,  # claude-3-5-haiku-20241022
-            max_tokens=500,  # 응답 최대 길이 (JSON이므로 적게 설정)
-            system=SYSTEM_PROMPT,  # 위에서 정의한 역할 지시
-            messages=[
-                {
-                    "role": "user",  # 사용자 역할
-                    "content": f"다음 웹페이지 콘텐츠를 분석해줘:\n\n{processed_text}"
-                }
-            ]
-        )
+        # Claude API 에러 핸들링
+        try:
+            # 메시지 생성 요청
+            message = client.messages.create(
+                model=CLAUDE_MODEL,  # claude-3-5-haiku-20241022
+                max_tokens=500,  # 응답 최대 길이 (JSON이므로 적게 설정)
+                system=SYSTEM_PROMPT,  # 위에서 정의한 역할 지시
+                messages=[
+                    {
+                        "role": "user",  # 사용자 역할
+                        "content": f"다음 웹페이지 콘텐츠를 분석해줘:\n\n{processed_text}"
+                    }
+                ]
+            )
+        except Exception as e:
+            # Claude API 에러를 세분화하여 처리
+            # anthropic 패키지의 에러 타입 확인
+            error_type = type(e).__name__
+            
+            # RateLimitError (429) 처리
+            if "RateLimitError" in error_type or "rate_limit" in str(e).lower():
+                logger.error(f"❌ Claude API Rate Limit: {e}")
+                return PhaseResult(
+                    phase="Phase 3: AI Analysis",
+                    score=0,
+                    reasons=["AI 분석 일시 중단 (요청 제한)"],
+                    should_block=False,
+                    skip_remaining=True,  # 남은 Phase 건너뛰기
+                    metadata={
+                        "error_code": "AI_RATE_LIMIT_REACHED",
+                        "error_message": "AI 분석 요청이 일시적으로 제한되었습니다. 잠시 후 다시 시도해주세요.",
+                        "retry_after": 60  # 60초 후 재시도 권장
+                    }
+                )
+            
+            # APIStatusError (529, 500 등) 처리
+            elif hasattr(e, 'status_code'):
+                status_code = getattr(e, 'status_code', 500)
+                
+                if status_code == 529:
+                    error_code = "AI_PROVIDER_OVERLOAD"
+                    error_message = "AI 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요."
+                    retry_after = 30
+                elif status_code >= 500:
+                    error_code = "AI_PROVIDER_ERROR"
+                    error_message = "AI 서비스에 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                    retry_after = 60
+                else:
+                    error_code = "UNKNOWN_SYSTEM_ERROR"
+                    error_message = f"예기치 못한 오류가 발생했습니다. (코드: {status_code})"
+                    retry_after = 120
+                
+                logger.error(f"❌ Claude API Error {status_code}: {e}")
+                return PhaseResult(
+                    phase="Phase 3: AI Analysis",
+                    score=0,
+                    reasons=[f"AI 분석 오류 (HTTP {status_code})"],
+                    should_block=False,
+                    skip_remaining=True,
+                    metadata={
+                        "error_code": error_code,
+                        "error_message": error_message,
+                        "retry_after": retry_after
+                    }
+                )
+            
+            # 기타 예외 처리
+            else:
+                logger.error(f"❌ Claude API 예외: {error_type} - {e}")
+                return PhaseResult(
+                    phase="Phase 3: AI Analysis",
+                    score=0,
+                    reasons=["AI 분석 중 예기치 못한 오류 발생"],
+                    should_block=False,
+                    skip_remaining=True,
+                    metadata={
+                        "error_code": "UNKNOWN_SYSTEM_ERROR",
+                        "error_message": "분석 중 예기치 못한 오류가 발생했습니다. 관리자에게 문의해주세요.",
+                        "error_details": str(e)
+                    }
+                )
         
         # ============================================
         # 응답 파싱

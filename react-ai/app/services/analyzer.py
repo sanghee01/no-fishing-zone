@@ -173,6 +173,21 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
             logger.info(f"🔄 [{request.request_id}] HTML 없음 - URL-Only AI 분석 실행")
             phase3_result = await analyze_url_only(url)
         
+        # 에러 발생 시 즉시 ERROR 응답 반환
+        if phase3_result.metadata.get("error_code"):
+            logger.warning(f"⚠️ [{request.request_id}] AI 분석 에러 - {phase3_result.metadata['error_code']}")
+            return AnalyzeResponse(
+                url=url,
+                status="ERROR", 
+                risk_score=0,
+                category="SystemError",
+                keyword="",
+                reasons=phase3_result.reasons,
+                error_code=phase3_result.metadata.get("error_code"),
+                error_message=phase3_result.metadata.get("error_message"),
+                retry_after=phase3_result.metadata.get("retry_after")
+            )
+        
         total_score += phase3_result.score
         all_reasons.extend(phase3_result.reasons)
         
@@ -192,8 +207,18 @@ async def analyze_url(request: AnalyzeRequest) -> AnalyzeResponse:
                 reasons=all_reasons
             )
     except Exception as e:
-        logger.error(f"❌ [{request.request_id}] Phase 3 오류: {e}")
-        all_reasons.append(f"Phase 3: 오류 발생 ({str(e)}) - 건너뜀")
+        # Phase 3 예외도 ERROR로 반환
+        logger.error(f"❌ [{request.request_id}] Phase 3 예외: {e}")
+        return AnalyzeResponse(
+            url=url,
+            status="ERROR",
+            risk_score=0,
+            category="SystemError",
+            keyword="",
+            reasons=[f"Phase 3 오류: {str(e)}"],
+            error_code="UNKNOWN_SYSTEM_ERROR",
+            error_message="분석 중 예기치 못한 오류가 발생했습니다."
+        )
     
     # ============================================
     # Phase 4: 검색 엔진 교차 검증

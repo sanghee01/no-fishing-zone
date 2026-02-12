@@ -48,7 +48,8 @@ class AnalyzeResponse(BaseModel):
     # - "WARNING": 주의 (30~59점)  
     # - "BLOCK": 차단 (60점 이상)
     # - "DEAD": 접속 불가 (서버 다운, 도메인 만료 등)
-    status: Literal["SAFE", "WARNING", "BLOCK", "DEAD"] = Field(..., description="위험 상태")
+    # - "ERROR": 시스템 오류 (Claude API 장애, 네트워크 오류 등)
+    status: Literal["SAFE", "WARNING", "BLOCK", "DEAD", "ERROR"] = Field(..., description="위험 상태")
     
     # risk_score: 총 위험 점수 (0점 이상)
     risk_score: int = Field(..., ge=0, description="총 위험 점수")
@@ -57,6 +58,7 @@ class AnalyzeResponse(BaseModel):
     # - "Common": 일반 서비스 (금융, 쇼핑 등)
     # - "Negative": 불법 콘텐츠 (도박, 음란물 등)
     # - "Trusted": 화이트리스트 도메인
+    # - "SystemError": 시스템 오류
     category: str = Field(default="", description="콘텐츠 카테고리")
     
     # keyword: AI가 감지한 브랜드/서비스명 (예: "신한은행", "네이버")
@@ -65,6 +67,16 @@ class AnalyzeResponse(BaseModel):
     # reasons: 각 Phase에서 발생한 점수의 근거 목록
     # 예: ["New domain (+15)", "Suspicious TLD (+10)"]
     reasons: List[str] = Field(default_factory=list, description="점수 부여 사유 목록")
+    
+    # ===== 에러 정보 필드 (status="ERROR"일 때 사용) =====
+    # error_code: 에러 코드 (AI_PROVIDER_OVERLOAD, AI_RATE_LIMIT_REACHED 등)
+    error_code: str | None = Field(default=None, description="에러 코드")
+    
+    # error_message: 사용자에게 표시할 에러 메시지
+    error_message: str | None = Field(default=None, description="사용자용 에러 메시지")
+    
+    # retry_after: 재시도 권장 시간 (초)
+    retry_after: int | None = Field(default=None, description="재시도 권장 시간(초)")
 
 
 # ============================================
