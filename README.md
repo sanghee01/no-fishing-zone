@@ -43,6 +43,8 @@
 
 **듀얼 AI 시스템**
 
+<img src="./docs/images/readme/ai-description.webp" width="100%">
+
 - **React AI (실시간 분석 엔진)**: URL 유입 즉시 페이지의 맥락과 구조를 이해하여 3초 내에 위험 여부를 판별합니다.
 - **Search AI (자율 수집 봇)**: 검색엔진처럼 인터넷을 스스로 돌아다니며, CertStream 실시간 모니터링을 통해 신규 피싱 사이트를 선제적으로 발견하고 DB를 자동 업데이트합니다.
 
