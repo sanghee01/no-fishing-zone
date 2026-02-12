@@ -162,10 +162,14 @@ async def analyze_with_ai(html_content: Optional[str]) -> PhaseResult:
         return PhaseResult(
             phase="Phase 3: AI Analysis",
             score=0,
-            reasons=["API 키 미설정 - 단계 건너뜀"],
+            reasons=["API 키 미설정 - AI 분석 불가"],
             should_block=False,
-            skip_remaining=False,
-            metadata={"error": "API key missing"}
+            skip_remaining=True,
+            metadata={
+                "error_code": "AI_PROVIDER_ERROR",
+                "error_message": "AI 서비스 설정이 올바르지 않습니다. 관리자에게 문의해주세요.",
+                "retry_after": 60
+            }
         )
     
     try:
