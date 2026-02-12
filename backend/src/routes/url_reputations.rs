@@ -151,6 +151,12 @@ struct ProgressEvent {
     #[serde(skip_serializing_if = "Option::is_none")]
     result: Option<UrlReputationResponse>,
     done: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    error_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    error_message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    retry_after: Option<u32>,
 }
 
 /// URL 분석 스트림 (SSE)
@@ -176,6 +182,9 @@ pub async fn analyze_stream(
                         status: "in_progress".to_string(),
                         result: None,
                         done: false,
+                        error_code: None,
+                        error_message: None,
+                        retry_after: None,
                     };
                     Some((
                         Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
@@ -189,6 +198,9 @@ pub async fn analyze_stream(
                         status: "in_progress".to_string(),
                         result: None,
                         done: false,
+                        error_code: None,
+                        error_message: None,
+                        retry_after: None,
                     };
 
                     Some((
@@ -218,6 +230,9 @@ pub async fn analyze_stream(
                             status: "completed".to_string(),
                             result: Some(response),
                             done: true,
+                            error_code: None,
+                            error_message: None,
+                            retry_after: None,
                         };
                         Some((
                             Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
@@ -230,6 +245,9 @@ pub async fn analyze_stream(
                             status: "completed".to_string(),
                             result: None,
                             done: false,
+                            error_code: None,
+                            error_message: None,
+                            retry_after: None,
                         };
                         // 플러시 보장을 위한 딜레이
                         tokio::time::sleep(Duration::from_millis(50)).await;
@@ -246,6 +264,9 @@ pub async fn analyze_stream(
                         status: "in_progress".to_string(),
                         result: None,
                         done: false,
+                        error_code: None,
+                        error_message: None,
+                        retry_after: None,
                     };
 
                     Some((
@@ -277,11 +298,38 @@ pub async fn analyze_stream(
                                 status: String,
                                 risk_score: i32,
                                 reasons: Option<Vec<String>>,
+                                
+                                // 에러 정보 필드
+                                error_code: Option<String>,
+                                error_message: Option<String>,
+                                retry_after: Option<u32>,
                             }
                             
                             if let Ok(ai_data) = response.json::<AiResponse>().await {
                                 // AI 응답 로깅
-                                println!("🤖 AI Response: status={}, score={}, reasons={:?}", ai_data.status, ai_data.risk_score, ai_data.reasons);
+                                println!("🤖 AI Response: status={}, score={}, reasons={:?}, error_code={:?}", 
+                                    ai_data.status, ai_data.risk_score, ai_data.reasons, ai_data.error_code);
+
+                                // ERROR 상태는 DB에 저장하지 않음
+                                // AI 서버의 시스템 오류(Claude API 장애 등)는 실제 페이지 상태가 아니므로
+                                // DB에 저장하지 않고 즉시 프론트엔드에 에러 이벤트 전송 후 종료
+                                // 이렇게 하면 서버가 정상화된 후 같은 URL을 조회할 때 잘못된 캐시 데이터를 반환하지 않음
+                                if ai_data.status == "ERROR" {
+                                    println!("⚠️ AI returned ERROR status - skipping DB save");
+                                    let event = ProgressEvent {
+                                        step: 2,
+                                        status: "error".to_string(),
+                                        result: None,
+                                        done: true,
+                                        error_code: ai_data.error_code,
+                                        error_message: ai_data.error_message,
+                                        retry_after: ai_data.retry_after,
+                                    };
+                                    return Some((
+                                        Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
+                                        AnalyzeState::Done,  // SaveResult 상태로 가지 않고 즉시 Done으로 종료
+                                    ));
+                                }
 
                                 let description = ai_data.reasons
                                     .clone()
@@ -309,6 +357,9 @@ pub async fn analyze_stream(
                                     status: "completed".to_string(),
                                     result: None,
                                     done: false,
+                                    error_code: None,
+                                    error_message: None,
+                                    retry_after: None,
                                 };
                                 // 플러시 보장을 위한 딜레이
                                 tokio::time::sleep(Duration::from_millis(50)).await;
@@ -347,6 +398,9 @@ pub async fn analyze_stream(
                         status: "in_progress".to_string(),
                         result: None,
                         done: false,
+                        error_code: None,
+                        error_message: None,
+                        retry_after: None,
                     };
 
                     Some((
@@ -371,6 +425,9 @@ pub async fn analyze_stream(
                                 status: "completed".to_string(),
                                 result: Some(response),
                                 done: true,
+                                error_code: None,
+                                error_message: None,
+                                retry_after: None,
                             };
                             Some((
                                 Ok::<_, Infallible>(Event::default().json_data(&event).unwrap()),
