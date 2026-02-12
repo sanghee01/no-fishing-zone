@@ -13,6 +13,8 @@ function getErrorIcon(errorCode: string): string {
     case "AI_RATE_LIMIT_REACHED":
       return "⏳";
     case "AI_PROVIDER_ERROR":
+    case "AI_SERVER_ERROR":
+    case "AI_RESPONSE_PARSE_ERROR":
     case "UNKNOWN_SYSTEM_ERROR":
       return "⚠️";
     case "SSE_CONNECTION_LOST":
@@ -31,6 +33,10 @@ function getErrorTitle(errorCode: string): string {
       return "분석 요청 제한";
     case "AI_PROVIDER_ERROR":
       return "AI 서비스 오류";
+    case "AI_SERVER_ERROR":
+      return "AI 서버 연결 실패";
+    case "AI_RESPONSE_PARSE_ERROR":
+      return "AI 응답 처리 오류";
     case "SSE_CONNECTION_LOST":
       return "연결 중단";
     case "NETWORK_ERROR":

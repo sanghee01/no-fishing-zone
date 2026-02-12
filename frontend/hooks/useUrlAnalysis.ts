@@ -67,6 +67,16 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
     }
 
     const controller = new AbortController();
+    let isAnalyzing = true;
+
+    // 분석 중 탭 전환/닫기 방지
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isAnalyzing && !state.result && !state.error) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     async function startAnalysis() {
       try {
@@ -137,6 +147,7 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
 
               // 완료 이벤트 (서버에서 done: true를 보내면 연결 종료)
               if (data.done) {
+                isAnalyzing = false;
                 controller.abort();
               }
             } catch (e) {
@@ -160,6 +171,8 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
         if (!controller.signal.aborted) {
           console.error("Analysis failed", err);
         }
+      } finally {
+        isAnalyzing = false;
       }
     }
 
@@ -167,6 +180,8 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
 
     return () => {
       controller.abort();
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      isAnalyzing = false;
     };
   }, [url, retryCount]);
 
