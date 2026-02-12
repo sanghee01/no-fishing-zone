@@ -6,12 +6,17 @@ import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 export type StepStatus = "pending" | "in_progress" | "completed";
 
+/**
+ * URL 분석 상태
+ */
 export interface AnalysisState {
-  step1: StepStatus;
-  step2: StepStatus;
-  step3: StepStatus;
+  step1: StepStatus; // DB 조회
+  step2: StepStatus; // AI 분석
+  step3: StepStatus; // 결과 저장
   result: UrlReputationResponse | null;
   error: string | null;
+  errorCode: string | null;
+  retryAfter: number | null;
 }
 
 interface UseUrlAnalysisResult extends AnalysisState {
@@ -31,6 +36,8 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
     step3: "pending",
     result: null,
     error: null,
+    errorCode: null,
+    retryAfter: null,
   });
 
   const retry = useCallback(() => {
@@ -40,6 +47,8 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
       step3: "pending",
       result: null,
       error: null,
+      errorCode: null,
+      retryAfter: null,
     });
     setRetryCount((prev) => prev + 1);
   }, []);
@@ -58,6 +67,16 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
     }
 
     const controller = new AbortController();
+    let isAnalyzing = true;
+
+    // 분석 중 탭 전환/닫기 방지
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isAnalyzing && !state.result && !state.error) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     async function startAnalysis() {
       try {
@@ -76,6 +95,21 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
 
             try {
               const data = JSON.parse(event.data);
+
+              if (data.status === "error") {
+                setState((prev) => ({
+                  ...prev,
+                  error: data.error_message || "분석 중 오류가 발생했습니다.",
+                  errorCode: data.error_code || "UNKNOWN_SYSTEM_ERROR",
+                  retryAfter: data.retry_after || null,
+                }));
+
+                // 에러 발생 시 연결 종료
+                if (data.done) {
+                  controller.abort();
+                }
+                return;
+              }
 
               // 진행 상태 업데이트
               if (data.step !== undefined) {
@@ -113,6 +147,7 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
 
               // 완료 이벤트 (서버에서 done: true를 보내면 연결 종료)
               if (data.done) {
+                isAnalyzing = false;
                 controller.abort();
               }
             } catch (e) {
@@ -121,11 +156,14 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
           },
           onerror(err) {
             console.error("SSE error:", err);
+
             setState((prev) => ({
               ...prev,
-              error: "서버 연결에 실패했습니다. 다시 시도해주세요.",
+              error: "서버 연결이 중단되었습니다. 다시 시도해주세요.",
+              errorCode: "SSE_CONNECTION_LOST",
+              retryAfter: null,
             }));
-            // 에러 발생 시 재시도 하지 않으려면 throw
+
             throw err;
           },
         });
@@ -133,6 +171,8 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
         if (!controller.signal.aborted) {
           console.error("Analysis failed", err);
         }
+      } finally {
+        isAnalyzing = false;
       }
     }
 
@@ -140,6 +180,8 @@ export function useUrlAnalysis(url: string): UseUrlAnalysisResult {
 
     return () => {
       controller.abort();
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      isAnalyzing = false;
     };
   }, [url, retryCount]);
 
