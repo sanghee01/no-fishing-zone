@@ -340,17 +340,19 @@ async def analyze_with_ai(html_content: Optional[str]) -> PhaseResult:
         # ============================================
         # JSON 파싱 실패
         # ============================================
-        # AI가 가끔 잘못된 형식으로 응답할 수 있음
         logger.error(f"❌ AI 응답 JSON 파싱 실패: {e}")
         return PhaseResult(
             phase="Phase 3: AI Analysis",
             score=0,
-            reasons=["AI 응답 파싱 실패 - 단계 건너뜀"],
+            reasons=["AI 응답 형식 오류"],
             should_block=False,
-            skip_remaining=False,
-            metadata={"error": f"JSON parse error: {str(e)}"}
-        )
-        
+            skip_remaining=True,
+            metadata={
+                "error_code": "AI_RESPONSE_PARSE_ERROR",
+                "error_message": "AI 응답 형식이 올바르지 않습니다. 잠시 후 다시 시도해주세요.",
+                "retry_after": 60
+            }
+        )      
     except Exception as e:
         # ============================================
         # 기타 예외
