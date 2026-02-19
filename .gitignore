@@ -25,3 +25,6 @@ postgres_data/
 # 우분투 환경 파일
 cloudflared.deb
 nginx.conf
+
+# 기타 파일
+obsidian
